@@ -1,9 +1,9 @@
-import { Image, View, Text, StyleSheet } from "react-native";
-import Users from "../../assets/dummy-data/Users";
+import { Image, View, Text } from "react-native";
 
 //STYLES
 import { styles } from "./chatroom-item.styles";
 
+// TODO: type declarations
 export default function ChatRoomItem({ chatRoom }) {
   const user = chatRoom.users[1];
   return (

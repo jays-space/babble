@@ -22,4 +22,13 @@ export const theme = {
   primary: {
     main: "#3777F0",
   },
+  grey: {
+    lightgrey: " #D3D3D3",
+  },
+  black: {
+    default: "#000",
+  },
+  white: {
+    default: "#FFF",
+  },
 };
