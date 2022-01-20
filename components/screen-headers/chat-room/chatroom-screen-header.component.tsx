@@ -8,6 +8,8 @@ import { styles } from "./chatroom-screen-header.styles";
 export default function ChatRoomScreenHeader(props) {
   const { width } = useWindowDimensions();
 
+  // console.log("props: ", props);
+
   return (
     <View style={[styles.root, { width: width - 45 }]}>
       {/* Avatar */}

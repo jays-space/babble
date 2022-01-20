@@ -13,7 +13,7 @@ export default function ChatRoomScreen() {
   const route = useRoute();
   const navigation = useNavigation();
 
-  navigation.setOptions({title: 'Jay'})
+  navigation.setOptions({title: 'Jay Mondlana'}) //* manually change header title
 
   return (
     <SafeAreaView style={styles.page}>

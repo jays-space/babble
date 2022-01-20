@@ -18,19 +18,19 @@ export default function HomeScreenHeader() {
       />
 
       {/* Title */}
-      <Text style={styles.title}>Home</Text>
+      <Text style={styles.title}>Babble</Text>
 
       {/* Icons */}
       <View style={styles.iconsContainer}>
         <Feather
           name="camera"
-          size={24}
+          size={22}
           color={styles.icons.color}
           style={styles.icon}
         />
         <Feather
           name="edit-2"
-          size={24}
+          size={22}
           color={styles.icons.color}
           style={styles.icon}
         />

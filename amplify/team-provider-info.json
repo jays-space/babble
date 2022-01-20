@@ -1,0 +1,20 @@
+{
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-babble-staging-132010-authRole",
+      "UnauthRoleArn": "arn:aws:iam::910100023747:role/amplify-babble-staging-132010-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::910100023747:role/amplify-babble-staging-132010-authRole",
+      "Region": "eu-west-2",
+      "DeploymentBucketName": "amplify-babble-staging-132010-deployment",
+      "UnauthRoleName": "amplify-babble-staging-132010-unauthRole",
+      "StackName": "amplify-babble-staging-132010",
+      "StackId": "arn:aws:cloudformation:eu-west-2:910100023747:stack/amplify-babble-staging-132010/b1a61c30-79f3-11ec-a287-0a51a8456894",
+      "AmplifyAppId": "d1nksasv01u65o"
+    },
+    "categories": {
+      "auth": {
+        "Babble": {}
+      }
+    }
+  }
+}

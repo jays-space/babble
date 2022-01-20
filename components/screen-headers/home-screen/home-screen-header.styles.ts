@@ -16,15 +16,16 @@ export const styles = StyleSheet.create({
   title: {
     flex: 1,
     marginLeft: 45,
-    textAlign: "center",
     fontSize: 16,
     fontWeight: "bold",
+    textAlign: "center",
+    color: theme.white.default,
   },
   iconsContainer: {
     flexDirection: "row",
   },
   icons: {
-    color: theme.grey.default,
+    color: theme.white.default,
   },
   icon: {
     marginHorizontal: 10,
