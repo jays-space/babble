@@ -23,7 +23,9 @@ export const theme = {
     main: "#3777F0",
   },
   grey: {
-    lightgrey: " #D3D3D3",
+    ultraLightGrey: "#F2F2F2",
+    lightgrey: "#D3D3D3",
+    default: "grey",
   },
   black: {
     default: "#000",
