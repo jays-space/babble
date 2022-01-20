@@ -1,8 +1,15 @@
-import React from "react";
-import { View, Text, TextInput } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
 import {
   AntDesign,
   Feather,
+  Ionicons,
   MaterialCommunityIcons,
   SimpleLineIcons,
 } from "@expo/vector-icons";
@@ -11,8 +18,35 @@ import {
 import { styles } from "./message-input.styles";
 
 export default function MessageInput() {
+  const [newMessage, setNewMessage] = useState("");
+
+  const sendMessage = () => {
+    //* Send message
+    alert(newMessage);
+    setNewMessage("");
+  };
+
+  const onPlusPress = () => {
+    console.warn("onPlus pressed");
+  };
+
+  //   TODO: type definitions
+  const handlePrimaryButtonPress = () => {
+    //* if there is a new message in state, envoke message send function
+
+    if (newMessage) {
+      sendMessage();
+    } else {
+      onPlusPress();
+    }
+  };
+
   return (
-    <View style={styles.root}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={80}
+      style={styles.root}
+    >
       <View style={styles.inputContainer}>
         {/* emoji btn*/}
         <SimpleLineIcons
@@ -23,7 +57,12 @@ export default function MessageInput() {
         />
 
         {/* input*/}
-        <TextInput style={styles.input} placeholder="Send Message..." />
+        <TextInput
+          style={styles.input}
+          placeholder="Send Message..."
+          value={newMessage}
+          onChangeText={setNewMessage}
+        />
 
         {/* other btn container*/}
         <Feather
@@ -40,13 +79,21 @@ export default function MessageInput() {
         />
       </View>
 
-      <View style={styles.primaryBtnContainer}>
-        <AntDesign
-          name="plus"
-          size={24}
-          color={styles.primaryBtnIcon.color}
-        />
-      </View>
-    </View>
+      <TouchableOpacity
+        style={styles.primaryBtnContainer}
+        onPress={handlePrimaryButtonPress}
+      >
+        {/* if state.newMessage is set, show the send icon, else the plus icon */}
+        {!newMessage ? (
+          <AntDesign
+            name="plus"
+            size={24}
+            color={styles.primaryBtnIcon.color}
+          />
+        ) : (
+          <Ionicons name="send" size={18} color={styles.primaryBtnIcon.color} />
+        )}
+      </TouchableOpacity>
+    </KeyboardAvoidingView>
   );
 }
