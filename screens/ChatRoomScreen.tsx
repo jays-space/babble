@@ -1,3 +1,4 @@
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { FlatList, SafeAreaView, StyleSheet } from "react-native";
 
 // COMPONENTS
@@ -9,6 +10,11 @@ import MessageInput from "../components/message-input";
 
 export default function ChatRoomScreen() {
   const chatHistory = chatData.messages;
+  const route = useRoute();
+  const navigation = useNavigation();
+
+  navigation.setOptions({title: 'Jay'})
+
   return (
     <SafeAreaView style={styles.page}>
       {/* chat message list */}

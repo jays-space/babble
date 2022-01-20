@@ -1,4 +1,5 @@
-import { Image, View, Text } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { Image, View, Text, TouchableOpacity } from "react-native";
 
 //STYLES
 import { styles } from "./chatroom-item.styles";
@@ -6,8 +7,17 @@ import { styles } from "./chatroom-item.styles";
 // TODO: type declarations
 export default function ChatRoomItem({ chatRoom }) {
   const user = chatRoom.users[1];
+  const navigation = useNavigation();
+
+  const handleNavigateToChatRoom = () => {
+    navigation.navigate("ChatRoom", { id: chatRoom.id });
+  };
+
   return (
-    <View style={styles.container}>
+    <TouchableOpacity
+      onPress={handleNavigateToChatRoom}
+      style={styles.container}
+    >
       {/* avatar */}
       <Image
         source={{
@@ -33,6 +43,6 @@ export default function ChatRoomItem({ chatRoom }) {
           {chatRoom.lastMessage.content}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }

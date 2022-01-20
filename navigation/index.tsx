@@ -14,10 +14,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import * as React from "react";
 import { ColorSchemeName, Pressable } from "react-native";
 
-import Colors from "../constants/Colors";
-import useColorScheme from "../hooks/useColorScheme";
-import HomeScreen from "../screens/HomeScreen";
-import TabTwoScreen from "../screens/TabTwoScreen";
+import Colors, { theme } from "../constants/Colors";
+
 import {
   RootStackParamList,
   RootTabParamList,
@@ -26,7 +24,12 @@ import {
 import LinkingConfiguration from "./LinkingConfiguration";
 
 //SCREENS
+import HomeScreen from "../screens/HomeScreen";
 import ChatRoomScreen from "../screens/ChatRoomScreen";
+
+//COMPONENTS
+import HomeScreenHeader from "../components/screen-headers/home-screen/home-screen-header.component";
+import ChatRoomScreenHeader from "../components/screen-headers/chat-room/chatroom-screen-header.component";
 
 export default function Navigation({
   colorScheme,
@@ -36,8 +39,8 @@ export default function Navigation({
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
-      // theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-      theme={DefaultTheme}
+      theme={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+      // theme={DefaultTheme}
     >
       <RootNavigator />
     </NavigationContainer>
@@ -54,58 +57,28 @@ function RootNavigator() {
   return (
     <Stack.Navigator>
       {/* TODO: type */}
-      <Stack.Screen name="ChatRoom" component={ChatRoomScreen} />
       <Stack.Screen
-        name="Root"
-        component={BottomTabNavigator}
-        options={{ headerShown: false }}
+        name="Home"
+        component={HomeScreen}
+        options={{
+          headerTitle: (props) => <HomeScreenHeader {...props} />,
+          headerStyle: {
+            backgroundColor: theme.primary.main,
+          },
+        }}
+      />
+      <Stack.Screen
+        name="ChatRoom"
+        component={ChatRoomScreen}
+        options={{
+          headerTitle: (props) => <ChatRoomScreenHeader {...props} />,
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: theme.primary.main,
+          },
+          headerTintColor: theme.white.default,
+        }}
       />
     </Stack.Navigator>
   );
-}
-
-/**
- * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
- * https://reactnavigation.org/docs/bottom-tab-navigator
- */
-const BottomTab = createBottomTabNavigator<RootTabParamList>();
-
-function BottomTabNavigator() {
-  const colorScheme = useColorScheme();
-
-  return (
-    <BottomTab.Navigator
-      initialRouteName="TabOne"
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme].tint,
-      }}
-    >
-      <BottomTab.Screen
-        name="TabOne"
-        component={HomeScreen}
-        options={({ navigation }: RootTabScreenProps<"TabOne">) => ({
-          title: "Home",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        })}
-      />
-      <BottomTab.Screen
-        name="TabTwo"
-        component={TabTwoScreen}
-        options={{
-          title: "Tab Two",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-    </BottomTab.Navigator>
-  );
-}
-
-/**
- * You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
- */
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={30} style={{ marginBottom: -3 }} {...props} />;
 }
