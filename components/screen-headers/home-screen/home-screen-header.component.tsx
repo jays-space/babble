@@ -1,12 +1,21 @@
+import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
 import React from "react";
-import { View, Text, Image, useWindowDimensions } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  useWindowDimensions,
+  TouchableOpacity,
+} from "react-native";
 
 // STYLES
 import { styles } from "./home-screen-header.styles";
 
 export default function HomeScreenHeader() {
   const { width } = useWindowDimensions();
+  const navigate = useNavigation()
+
   return (
     <View style={[styles.root, { width }]}>
       {/* Avatar */}
@@ -28,12 +37,14 @@ export default function HomeScreenHeader() {
           color={styles.icons.color}
           style={styles.icon}
         />
-        <Feather
-          name="edit-2"
-          size={22}
-          color={styles.icons.color}
-          style={styles.icon}
-        />
+        <TouchableOpacity onPress={() => navigate.navigate("Contacts")}>
+          <Feather
+            name="edit-2"
+            size={22}
+            color={styles.icons.color}
+            style={styles.icon}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );

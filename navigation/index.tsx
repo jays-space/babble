@@ -25,6 +25,7 @@ import LinkingConfiguration from "./LinkingConfiguration";
 
 //SCREENS
 import HomeScreen from "../screens/HomeScreen";
+import ContactsScreen from "../screens/ContactsScreen";
 import ChatRoomScreen from "../screens/ChatRoomScreen";
 
 //COMPONENTS
@@ -67,6 +68,20 @@ function RootNavigator() {
           },
         }}
       />
+
+      <Stack.Screen
+        name="Contacts"
+        component={ContactsScreen}
+        options={{
+          headerTitle: (props) => <ChatRoomScreenHeader {...props} />,
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: theme.primary.main,
+          },
+          headerTintColor: theme.white.default,
+        }}
+      />
+      
       <Stack.Screen
         name="ChatRoom"
         component={ChatRoomScreen}
