@@ -9,11 +9,18 @@
       "UnauthRoleName": "amplify-babble-staging-132010-unauthRole",
       "StackName": "amplify-babble-staging-132010",
       "StackId": "arn:aws:cloudformation:eu-west-2:910100023747:stack/amplify-babble-staging-132010/b1a61c30-79f3-11ec-a287-0a51a8456894",
-      "AmplifyAppId": "d1nksasv01u65o"
+      "AmplifyAppId": "d1nksasv01u65o",
+      "AuthTriggerTemplateURL": "https://s3.amazonaws.com/amplify-babble-staging-132010-deployment/amplify-cfn-templates/auth/auth-trigger-cloudformation-template.json"
     },
     "categories": {
       "auth": {
         "Babble": {}
+      },
+      "function": {
+        "BabblePostConfirmation": {
+          "deploymentBucketName": "amplify-babble-staging-132010-deployment",
+          "s3Key": "amplify-builds/BabblePostConfirmation-49634c6459426b452f2f-build.zip"
+        }
       }
     }
   }

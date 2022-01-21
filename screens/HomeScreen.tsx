@@ -1,12 +1,23 @@
-import { FlatList, StyleSheet, View } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 //COMPONENTS
 import ChatRoomItem from "../components/chatroom-item";
 
 //DUMMY DATA
 import chatRoomData from "../assets/dummy-data/ChatRooms";
+import { Auth } from "aws-amplify";
 
 export default function HomeScreen() {
+  const handleSignOut = () => {
+    Auth.signOut();
+  };
+
   return (
     <View style={styles.page}>
       <FlatList
@@ -16,6 +27,20 @@ export default function HomeScreen() {
         )}
         showsVerticalScrollIndicator={false}
       />
+
+      <TouchableOpacity
+        onPress={handleSignOut}
+        style={{
+          backgroundColor: "orangered",
+          width: "100%",
+          height: 50,
+          borderRadius: 30,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Text>SignOut</Text>
+      </TouchableOpacity>
     </View>
   );
 }
