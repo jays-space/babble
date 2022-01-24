@@ -14,15 +14,32 @@ import {
   SimpleLineIcons,
 } from "@expo/vector-icons";
 
+//AWS
+import { Auth, DataStore } from "aws-amplify";
+
+//MODELS
+import { Message } from "../../src/models";
+
 //STYLES
 import { styles } from "./message-input.styles";
 
-export default function MessageInput() {
+export default function MessageInput({ chatRoomID }) {
   const [newMessage, setNewMessage] = useState("");
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
+    const {
+      attributes: { sub: currentUserID },
+    } = await Auth.currentAuthenticatedUser();
+
     //* Send message
-    alert(newMessage);
+    await DataStore.save(
+      new Message({
+        content: newMessage,
+        userID: currentUserID,
+        chatroomID: chatRoomID,
+      })
+    );
+
     setNewMessage("");
   };
 

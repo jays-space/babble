@@ -11,20 +11,19 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
   },
   currentUserSpeechBubbleColor: {
-    backgroundColor: "lightgrey",
-    color: "green",
-    marginLeft: "auto",
-    marginRight: 10,
-  },
-  senderSpeechBubbleColor: {
     backgroundColor: theme.primary.main,
     marginLeft: 10,
     marginRight: "auto",
   },
   currentUserMessageColor: {
-    color: theme.black.default,
+    color: theme.white.default,
+  },
+  senderSpeechBubbleColor: {
+    backgroundColor: "lightgrey",
+    marginLeft: "auto",
+    marginRight: 10,
   },
   senderMessageColor: {
-    color: theme.white.default,
+    color: theme.black.default,
   },
 });

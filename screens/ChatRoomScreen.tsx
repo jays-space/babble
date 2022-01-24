@@ -1,35 +1,83 @@
+import { useEffect, useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
-import { FlatList, SafeAreaView, StyleSheet } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
+
+// AWS
+import { DataStore } from "aws-amplify";
+
+// MODELS
+import { ChatRoom, Message as MessageModel } from "../src/models";
 
 // COMPONENTS
 import Message from "../components/message/";
-
-//DUMMY DATA
-import chatData from "../assets/dummy-data/Chats";
 import MessageInput from "../components/message-input";
 
 export default function ChatRoomScreen() {
-  const chatHistory = chatData.messages;
+  const [messages, setMessages] = useState<MessageModel[]>([]);
+  const [chatRoom, setChatRoom] = useState<ChatRoom | null>(null);
+
   const route = useRoute();
   const navigation = useNavigation();
 
-  console.log("route.params: ", route.params);
+  useEffect(() => {
+    fetchChatRoom();
+  }, []);
 
-  navigation.setOptions({ title:  route?.params?.contact?.name}); //* manually change header title
+  useEffect(() => {
+    fetchMessages();
+  }, [chatRoom]);
+
+  const fetchChatRoom = async () => {
+    if (!route.params?.id) {
+      console.warn("No chatroom id provided");
+      return;
+    }
+
+    const chatRoom = await DataStore.query(ChatRoom, route.params.id);
+    if (!chatRoom) {
+      console.error("Couldn't find a chat room with this id");
+    } else {
+      setChatRoom(chatRoom);
+    }
+  };
+
+  const fetchMessages = async () => {
+    if (!chatRoom) {
+      return;
+    }
+
+    const fetchedMessages = await DataStore.query(MessageModel, (message) =>
+      message.chatroomID("eq", chatRoom?.id)
+    );
+
+    setMessages(fetchedMessages);
+  };
+
+  // console.log("route.params: ", route.params);
+  // console.log("messages: ", messages);
+
+  if (!chatRoom) {
+    return <ActivityIndicator />;
+  }
+
+  navigation.setOptions({ title: route?.params?.contact?.name }); //* manually change header title
 
   return (
     <SafeAreaView style={styles.page}>
       {/* chat message list */}
       <FlatList
-        inverted={true}
-        data={chatHistory}
-        renderItem={({ item: { content, user } }) => (
-          <Message message={content} user={user} />
-        )}
+        inverted
+        data={messages}
+        renderItem={({ item: { content } }) => <Message message={content} />}
       />
 
       {/* new message input */}
-      <MessageInput />
+      <MessageInput chatRoomID={chatRoom?.id} />
     </SafeAreaView>
   );
 }

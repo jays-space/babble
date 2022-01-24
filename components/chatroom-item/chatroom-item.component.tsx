@@ -20,7 +20,7 @@ import { styles } from "./chatroom-item.styles";
 // TODO: type declarations
 export default function ChatRoomItem({ chatRoom }) {
   //* all users in this chatRoom
-  const [users, setUsers] = useState<User[]>([]);
+  // const [users, setUsers] = useState<User[]>([]);
 
   //* the displayed user's details
   const [user, setUser] = useState<User | null>(null);
@@ -36,7 +36,7 @@ export default function ChatRoomItem({ chatRoom }) {
         .filter(({ chatRoom: { id } }) => id === chatRoom.id)
         .map(({ user }) => user);
 
-      setUsers(allUsers);
+      // setUsers(allUsers);
 
       const {
         attributes: { sub: currentUserID },
