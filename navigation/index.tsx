@@ -57,7 +57,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 function RootNavigator() {
   return (
     <Stack.Navigator>
-      {/* TODO: type */}
+      {/* TODO: types */}
       <Stack.Screen
         name="Home"
         component={HomeScreen}
@@ -73,7 +73,7 @@ function RootNavigator() {
         name="Contacts"
         component={ContactsScreen}
         options={{
-          headerTitle: (props) => <ChatRoomScreenHeader {...props} />,
+          title: "Contacts",
           headerBackTitleVisible: false,
           headerStyle: {
             backgroundColor: theme.primary.main,
@@ -81,7 +81,7 @@ function RootNavigator() {
           headerTintColor: theme.white.default,
         }}
       />
-      
+
       <Stack.Screen
         name="ChatRoom"
         component={ChatRoomScreen}

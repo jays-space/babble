@@ -13,7 +13,9 @@ export default function ChatRoomScreen() {
   const route = useRoute();
   const navigation = useNavigation();
 
-  navigation.setOptions({title: 'Jay Mondlana'}) //* manually change header title
+  console.log("route.params: ", route.params);
+
+  navigation.setOptions({ title:  route?.params?.contact?.name}); //* manually change header title
 
   return (
     <SafeAreaView style={styles.page}>

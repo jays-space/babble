@@ -52,6 +52,13 @@ export const schema = {
                         "associatedWith": "chatRoom"
                     }
                 },
+                "newMessages": {
+                    "name": "newMessages",
+                    "isArray": false,
+                    "type": "Int",
+                    "isRequired": false,
+                    "attributes": []
+                },
                 "createdAt": {
                     "name": "createdAt",
                     "isArray": false,
@@ -358,5 +365,5 @@ export const schema = {
     },
     "enums": {},
     "nonModels": {},
-    "version": "28912b339e1323091ae6049a191a62a0"
+    "version": "2cc477d645c013dd316343f0df268647"
 };
