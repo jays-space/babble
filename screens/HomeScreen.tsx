@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -6,14 +7,42 @@ import {
   View,
 } from "react-native";
 
+//AWS
+import { Auth, DataStore } from "aws-amplify";
+
+//MODELS
+import { ChatRoom } from "../src/models";
+
 //COMPONENTS
 import ChatRoomItem from "../components/chatroom-item";
 
 //DUMMY DATA
 import chatRoomData from "../assets/dummy-data/ChatRooms";
-import { Auth } from "aws-amplify";
+import { ChatRoomUser } from "../src/models";
 
 export default function HomeScreen() {
+  const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
+
+  useEffect(() => {
+    const fetchChatRooms = async () => {
+      const {
+        attributes: { sub: currentUserID },
+      } = await Auth.currentAuthenticatedUser();
+
+      /* 
+      * get all chatRoomUser data, filter out all records where currentUser 
+      * is the chatRoomUser, then return an array of those chatRooms
+      */
+      const currentUserChatRooms = (await DataStore.query(ChatRoomUser))
+        .filter(({ user: { id } }) => id === currentUserID)
+        .map(({ chatRoom }) => chatRoom);
+
+      setChatRooms(currentUserChatRooms);
+    };
+
+    fetchChatRooms();
+  }, []);
+
   const handleSignOut = () => {
     Auth.signOut();
   };
@@ -21,7 +50,7 @@ export default function HomeScreen() {
   return (
     <View style={styles.page}>
       <FlatList
-        data={chatRoomData}
+        data={chatRooms}
         renderItem={({ item: chatRoom }) => (
           <ChatRoomItem chatRoom={chatRoom} />
         )}
