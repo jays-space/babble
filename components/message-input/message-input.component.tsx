@@ -22,8 +22,9 @@ import { Message } from "../../src/models";
 
 //STYLES
 import { styles } from "./message-input.styles";
+import { ChatRoom } from "../../src/models";
 
-export default function MessageInput({ chatRoomID }) {
+export default function MessageInput({ chatRoom }) {
   const [newMessage, setNewMessage] = useState("");
 
   const sendMessage = async () => {
@@ -32,15 +33,25 @@ export default function MessageInput({ chatRoomID }) {
     } = await Auth.currentAuthenticatedUser();
 
     //* Send message
-    await DataStore.save(
+    const newMessageRef = await DataStore.save(
       new Message({
         content: newMessage,
         userID: currentUserID,
-        chatroomID: chatRoomID,
+        chatroomID: chatRoom.id,
       })
     );
 
+    updateLastMessage(newMessageRef);
+
     setNewMessage("");
+  };
+
+  const updateLastMessage = async (messageRefToUpdateWith) => {
+    await DataStore.save(
+      ChatRoom.copyOf(chatRoom, (updatedChatRoom) => {
+        updatedChatRoom.LastMessage = messageRefToUpdateWith;
+      })
+    );
   };
 
   const onPlusPress = () => {

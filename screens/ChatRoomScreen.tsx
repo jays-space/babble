@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 // AWS
-import { DataStore } from "aws-amplify";
+import { DataStore, SortDirection } from "aws-amplify";
 
 // MODELS
 import { ChatRoom, Message as MessageModel } from "../src/models";
@@ -51,15 +51,19 @@ export default function ChatRoomScreen() {
       return;
     }
 
-    const fetchedMessages = await DataStore.query(MessageModel, (message) =>
-      message.chatroomID("eq", chatRoom?.id)
+    const fetchedMessages = await DataStore.query(
+      MessageModel,
+      (message) => message.chatroomID("eq", chatRoom?.id),
+      {
+        sort: (message) => message.createdAt(SortDirection.DESCENDING),
+      }
     );
 
     setMessages(fetchedMessages);
   };
 
   // console.log("route.params: ", route.params);
-  // console.log("messages: ", messages);
+  // console.log("chatRoom: ", chatRoom);
 
   if (!chatRoom) {
     return <ActivityIndicator />;
@@ -77,7 +81,7 @@ export default function ChatRoomScreen() {
       />
 
       {/* new message input */}
-      <MessageInput chatRoomID={chatRoom?.id} />
+      <MessageInput chatRoom={chatRoom} />
     </SafeAreaView>
   );
 }

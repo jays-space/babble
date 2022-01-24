@@ -12,7 +12,7 @@ import {
 import { Auth, DataStore } from "aws-amplify";
 
 // MODELS
-import { User, ChatRoomUser } from "../../src/models";
+import { User, ChatRoomUser, Message } from "../../src/models";
 
 //STYLES
 import { styles } from "./chatroom-item.styles";
@@ -21,16 +21,19 @@ import { styles } from "./chatroom-item.styles";
 export default function ChatRoomItem({ chatRoom }) {
   //* all users in this chatRoom
   // const [users, setUsers] = useState<User[]>([]);
+  const [lastMessage, setLastMessage] = useState<Message | undefined>(
+    undefined
+  );
 
   //* the displayed user's details
   const [user, setUser] = useState<User | null>(null);
 
   const navigation = useNavigation();
 
+  /*
+   * for each chatRoom, match ids where ChatRoomUsers and chatRooms are the same. Return all users who are part of a chatRoom with currentUser.
+   */
   useEffect(() => {
-    /*
-     * for each chatRoom, match ids where ChatRoomUsers and chatRooms are the same. Return all users who are part of a chatRoom with currentUser.
-     */
     const fetchAllUsers = async () => {
       const allUsers = (await DataStore.query(ChatRoomUser))
         .filter(({ chatRoom: { id } }) => id === chatRoom.id)
@@ -49,6 +52,18 @@ export default function ChatRoomItem({ chatRoom }) {
     };
 
     fetchAllUsers();
+  }, []);
+  // console.log("lastMesageID: ", chatRoom.chatRoomLastMessageId);
+
+  /*
+   * Fetch the message which matches the lastMessageID from the chatRoom obj (if !null).
+   */
+  useEffect(() => {
+    if (chatRoom?.chatRoomLastMessageId) {
+      DataStore.query(Message, chatRoom.chatRoomLastMessageId).then(
+        setLastMessage
+      );
+    }
   }, []);
 
   const handleNavigateToChatRoom = () => {
@@ -82,11 +97,11 @@ export default function ChatRoomItem({ chatRoom }) {
       <View style={styles.contentContainer}>
         <View style={styles.content}>
           <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.text}>{chatRoom.lastMessage?.createdAt}</Text>
+          <Text style={styles.text}>{lastMessage?.createdAt}</Text>
         </View>
 
         <Text numberOfLines={1} style={styles.text}>
-          {chatRoom.lastMessage?.content}
+          {lastMessage?.content}
         </Text>
       </View>
     </TouchableOpacity>

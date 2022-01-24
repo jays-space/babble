@@ -11,14 +11,10 @@ import {
 import { Auth, DataStore } from "aws-amplify";
 
 //MODELS
-import { ChatRoom } from "../src/models";
+import { ChatRoom, ChatRoomUser } from "../src/models";
 
 //COMPONENTS
 import ChatRoomItem from "../components/chatroom-item";
-
-//DUMMY DATA
-import chatRoomData from "../assets/dummy-data/ChatRooms";
-import { ChatRoomUser } from "../src/models";
 
 export default function HomeScreen() {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -29,10 +25,10 @@ export default function HomeScreen() {
         attributes: { sub: currentUserID },
       } = await Auth.currentAuthenticatedUser();
 
-      /* 
-      * get all chatRoomUser data, filter out all records where currentUser 
-      * is the chatRoomUser, then return an array of those chatRooms
-      */
+      /*
+       * get all chatRoomUser data, filter out all records where currentUser
+       * is the chatRoomUser, then return an array of those chatRooms
+       */
       const currentUserChatRooms = (await DataStore.query(ChatRoomUser))
         .filter(({ user: { id } }) => id === currentUserID)
         .map(({ chatRoom }) => chatRoom);
