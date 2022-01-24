@@ -32,6 +32,34 @@ export default function ChatRoomScreen() {
     fetchMessages();
   }, [chatRoom]);
 
+  //* real time sync
+  useEffect(() => {
+    const subscription = DataStore.observe(MessageModel).subscribe(
+      (message) => {
+        //? console.log(message.model, message.opType, message.element);
+        // [Function Message] INSERT Message {
+        //   "_deleted": undefined,
+        //   "_lastChangedAt": undefined,
+        //   "_version": undefined,
+        //   "chatroomID": "e1a82a6f-efa9-41db-bc44-3002c2c0e62c",
+        //   "content": "I’m great thanks. How are you feeling?",
+        //   "id": "1f28643d-a6a8-41a7-bc5d-295b024bf169",
+        //   "userID": "199b13a3-a7fa-40ba-af19-1e503a1282ed",
+        // }
+
+        //* append new message to messages
+        if (message.model === MessageModel && message.opType === "INSERT") {
+          setMessages((currentMessages) => [
+            message.element,
+            ...currentMessages,
+          ]);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const fetchChatRoom = async () => {
     if (!route.params?.id) {
       console.warn("No chatroom id provided");
@@ -77,7 +105,7 @@ export default function ChatRoomScreen() {
       <FlatList
         inverted
         data={messages}
-        renderItem={({ item: { content } }) => <Message message={content} />}
+        renderItem={({ item }) => <Message message={item} />}
       />
 
       {/* new message input */}

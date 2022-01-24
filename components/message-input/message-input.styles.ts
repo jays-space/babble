@@ -5,6 +5,7 @@ import { theme } from "../../constants/Colors";
 
 export const styles = StyleSheet.create({
   root: {
+    marginBottom: 10,
     padding: 10,
     flexDirection: "row",
   },

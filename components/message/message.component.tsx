@@ -29,11 +29,11 @@ export default function Message({ message }) {
         attributes: { sub: currentUserID },
       } = await Auth.currentAuthenticatedUser();
 
-      setIsCurrentUserMessage(messageSender.id === currentUserID);
+      setIsCurrentUserMessage(messageSender.id !== currentUserID);
     };
 
     checkIfIsCurrentUserMessage();
-  }, []);
+  }, [messageSender]);
 
   // TODO: re-renders infinately. WHY??
   // message?.userID === messageSender
@@ -60,7 +60,7 @@ export default function Message({ message }) {
             : styles.senderMessageColor
         }
       >
-        {message}
+        {message.content}
       </Text>
     </View>
   );
