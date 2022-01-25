@@ -1,6 +1,6 @@
 import { useNavigation } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,19 +9,39 @@ import {
   TouchableOpacity,
 } from "react-native";
 
+//AWS
+import { Auth, DataStore } from "aws-amplify";
+
+//MODELS
+import { User } from "../../../src/models";
+
 // STYLES
 import { styles } from "./home-screen-header.styles";
 
 export default function HomeScreenHeader() {
+  const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
+
   const { width } = useWindowDimensions();
-  const navigate = useNavigation()
+  const navigate = useNavigation();
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      const {
+        attributes: { sub: currentUserID },
+      } = await Auth.currentAuthenticatedUser();
+
+      DataStore.query(User, currentUserID).then(setCurrentUser);
+    };
+
+    fetchCurrentUser();
+  }, []);
 
   return (
     <View style={[styles.root, { width }]}>
       {/* Avatar */}
       <Image
         source={{
-          uri: "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/vadim.jpg",
+          uri: currentUser?.imageUri,
         }}
         style={styles.avatar}
       />
