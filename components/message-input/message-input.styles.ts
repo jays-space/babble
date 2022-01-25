@@ -7,6 +7,9 @@ export const styles = StyleSheet.create({
   root: {
     marginBottom: 10,
     padding: 10,
+    flexDirection: "column",
+  },
+  inputContainerWrapper: {
     flexDirection: "row",
   },
   inputContainer: {

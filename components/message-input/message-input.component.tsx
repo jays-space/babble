@@ -13,19 +13,21 @@ import {
   MaterialCommunityIcons,
   SimpleLineIcons,
 } from "@expo/vector-icons";
+import EmojiSelector from "react-native-emoji-selector";
 
 //AWS
 import { Auth, DataStore } from "aws-amplify";
 
 //MODELS
-import { Message } from "../../src/models";
+import { Message, ChatRoom } from "../../src/models";
 
 //STYLES
 import { styles } from "./message-input.styles";
-import { ChatRoom } from "../../src/models";
 
 export default function MessageInput({ chatRoom }) {
   const [newMessage, setNewMessage] = useState("");
+  const [isEmojiPickerVisible, setIsEmojiPickerVisible] =
+    useState<boolean>(false);
 
   const sendMessage = async () => {
     const {
@@ -69,59 +71,78 @@ export default function MessageInput({ chatRoom }) {
     }
   };
 
+  const toggleEmojiPickerVisibility = () => {
+    setIsEmojiPickerVisible(!isEmojiPickerVisible);
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={80}
-      style={styles.root}
+      style={[styles.root, { height: isEmojiPickerVisible ? "50%" : 'auto' }]}
     >
-      <View style={styles.inputContainer}>
-        {/* emoji btn*/}
-        <SimpleLineIcons
-          name="emotsmile"
-          size={24}
-          color={styles.emoteSmileBtn.color}
-          style={styles.emoteSmileBtn}
-        />
+      <View style={styles.inputContainerWrapper}>
+        <View style={styles.inputContainer}>
+          {/* emoji btn*/}
+          <TouchableOpacity onPress={toggleEmojiPickerVisibility}>
+            <SimpleLineIcons
+              name="emotsmile"
+              size={24}
+              color={styles.emoteSmileBtn.color}
+              style={styles.emoteSmileBtn}
+            />
+          </TouchableOpacity>
 
-        {/* input*/}
-        <TextInput
-          style={styles.input}
-          placeholder="Send Message..."
-          value={newMessage}
-          onChangeText={setNewMessage}
-        />
+          {/* input*/}
+          <TextInput
+            style={styles.input}
+            placeholder="Send Message..."
+            value={newMessage}
+            onChangeText={setNewMessage}
+          />
 
-        {/* other btn container*/}
-        <Feather
-          name="camera"
-          size={24}
-          color={styles.emoteSmileBtn.color}
-          style={styles.emoteSmileBtn}
-        />
-        <MaterialCommunityIcons
-          name="microphone-outline"
-          size={24}
-          color={styles.emoteSmileBtn.color}
-          style={styles.emoteSmileBtn}
-        />
+          {/* other btn container*/}
+          <Feather
+            name="camera"
+            size={24}
+            color={styles.emoteSmileBtn.color}
+            style={styles.emoteSmileBtn}
+          />
+          <MaterialCommunityIcons
+            name="microphone-outline"
+            size={24}
+            color={styles.emoteSmileBtn.color}
+            style={styles.emoteSmileBtn}
+          />
+        </View>
+
+        <TouchableOpacity
+          style={styles.primaryBtnContainer}
+          onPress={handlePrimaryButtonPress}
+        >
+          {/* if state.newMessage is set, show the send icon, else the plus icon */}
+          {!newMessage ? (
+            <AntDesign
+              name="plus"
+              size={24}
+              color={styles.primaryBtnIcon.color}
+            />
+          ) : (
+            <Ionicons
+              name="send"
+              size={18}
+              color={styles.primaryBtnIcon.color}
+            />
+          )}
+        </TouchableOpacity>
       </View>
 
-      <TouchableOpacity
-        style={styles.primaryBtnContainer}
-        onPress={handlePrimaryButtonPress}
-      >
-        {/* if state.newMessage is set, show the send icon, else the plus icon */}
-        {!newMessage ? (
-          <AntDesign
-            name="plus"
-            size={24}
-            color={styles.primaryBtnIcon.color}
-          />
-        ) : (
-          <Ionicons name="send" size={18} color={styles.primaryBtnIcon.color} />
-        )}
-      </TouchableOpacity>
+      {isEmojiPickerVisible && (
+        <EmojiSelector
+          onEmojiSelected={(emoji) => console.log(emoji)}
+          columns={8}
+        />
+      )}
     </KeyboardAvoidingView>
   );
 }
