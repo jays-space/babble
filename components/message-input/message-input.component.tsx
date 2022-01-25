@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  Keyboard,
 } from "react-native";
 import {
   AntDesign,
@@ -45,6 +46,7 @@ export default function MessageInput({ chatRoom }) {
 
     updateLastMessage(newMessageRef);
 
+    setIsEmojiPickerVisible(false);
     setNewMessage("");
   };
 
@@ -72,6 +74,7 @@ export default function MessageInput({ chatRoom }) {
   };
 
   const toggleEmojiPickerVisibility = () => {
+    Keyboard.dismiss();
     setIsEmojiPickerVisible(!isEmojiPickerVisible);
   };
 
@@ -79,7 +82,7 @@ export default function MessageInput({ chatRoom }) {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={80}
-      style={[styles.root, { height: isEmojiPickerVisible ? "50%" : 'auto' }]}
+      style={[styles.root, { height: isEmojiPickerVisible ? "50%" : "auto" }]}
     >
       <View style={styles.inputContainerWrapper}>
         <View style={styles.inputContainer}>
@@ -99,6 +102,7 @@ export default function MessageInput({ chatRoom }) {
             placeholder="Send Message..."
             value={newMessage}
             onChangeText={setNewMessage}
+            onFocus={() => setIsEmojiPickerVisible(false)}
           />
 
           {/* other btn container*/}
@@ -139,7 +143,9 @@ export default function MessageInput({ chatRoom }) {
 
       {isEmojiPickerVisible && (
         <EmojiSelector
-          onEmojiSelected={(emoji) => console.log(emoji)}
+          onEmojiSelected={(emoji) =>
+            setNewMessage((currentMessage) => currentMessage + emoji)
+          }
           columns={8}
         />
       )}
