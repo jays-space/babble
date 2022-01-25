@@ -97,8 +97,6 @@ export default function ChatRoomScreen() {
     return <ActivityIndicator />;
   }
 
-  navigation.setOptions({ title: route?.params?.contact?.name }); //* manually change header title
-
   return (
     <SafeAreaView style={styles.page}>
       {/* chat message list */}

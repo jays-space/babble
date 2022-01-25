@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
 //AWS
-import { DataStore } from "aws-amplify";
+import { Auth, DataStore } from "aws-amplify";
+
+//MODELS
 import { User } from "../src/models";
 
 //COMPONENTS
@@ -12,13 +14,22 @@ export default function ContactsScreen() {
   const [contacts, setContacts] = useState<User[]>([]);
   useEffect(() => {
     //* query users
-    DataStore.query(User).then(setContacts);
+    // const allUsers = await DataStore.query(User).then(setContacts);
 
-    // const fetchContacts = async () => {
-    //   const users = await DataStore.query(User);
-    //   setContacts(users);
-    // };
-    // fetchContacts();
+    const fetchContacts = async () => {
+      const {
+        attributes: { sub: currentUserID },
+      } = await Auth.currentAuthenticatedUser();
+
+      //* filter out currentUser
+      const allUsers = (await DataStore.query(User))
+        .filter(({ id }) => id !== currentUserID)
+        .map((user) => user);
+
+      setContacts(allUsers);
+    };
+
+    fetchContacts();
   }, []);
 
   return (

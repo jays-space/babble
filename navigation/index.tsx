@@ -85,14 +85,14 @@ function RootNavigator() {
       <Stack.Screen
         name="ChatRoom"
         component={ChatRoomScreen}
-        options={{
-          headerTitle: (props) => <ChatRoomScreenHeader {...props} />,
+        options={({ route }) => ({
+          headerTitle: () => <ChatRoomScreenHeader chatRoomID={route.params?.id} />,
           headerBackTitleVisible: false,
           headerStyle: {
             backgroundColor: theme.primary.main,
           },
           headerTintColor: theme.white.default,
-        }}
+        })}
       />
     </Stack.Navigator>
   );

@@ -1,27 +1,55 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, Image, useWindowDimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+
+//AWS
+import { Auth, DataStore } from "aws-amplify";
+
+//MODELS
+import { ChatRoomUser, User } from "../../../src/models";
 
 // STYLES
 import { styles } from "./chatroom-screen-header.styles";
 
-export default function ChatRoomScreenHeader(props) {
+export default function ChatRoomScreenHeader({ chatRoomID, children }) {
+  const [user, setUser] = useState<User | null>(null);
   const { width } = useWindowDimensions();
 
-  // console.log("props: ", props);
+  useEffect(() => {
+    if (chatRoomID === null) {
+      return;
+    }
+
+    const fetchAllUsers = async () => {
+      const allUsers = (await DataStore.query(ChatRoomUser))
+        .filter(({ chatRoom: { id } }) => id === chatRoomID)
+        .map(({ user }) => user);
+
+      // setUsers(allUsers);
+
+      const {
+        attributes: { sub: currentUserID },
+      } = await Auth.currentAuthenticatedUser();
+
+      //* return user where user.id is not currentUserID
+      setUser(allUsers.find((user) => user.id !== currentUserID) || null);
+    };
+
+    fetchAllUsers();
+  }, []);
 
   return (
     <View style={[styles.root, { width: width - 45 }]}>
       {/* Avatar */}
       <Image
         source={{
-          uri: "https://notjustdev-dummy.s3.us-east-2.amazonaws.com/avatars/vadim.jpg",
+          uri: user?.imageUri,
         }}
         style={styles.avatar}
       />
 
-      {/* Title */}
-      <Text style={styles.title}>{props.children}</Text>
+      {/* Title - contact name */}
+      <Text style={styles.title}>{user?.name}</Text>
 
       {/* Icons */}
       <View style={styles.iconsContainer}>
