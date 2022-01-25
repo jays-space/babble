@@ -9,6 +9,16 @@ export const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "column",
   },
+  sendImageContainer: {
+    marginBottom: 20,
+    padding: 10,
+    flexDirection: "row",
+    alignSelf: "stretch",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: theme.primary.main,
+    borderRadius: 10,    
+  },
   inputContainerWrapper: {
     flexDirection: "row",
   },

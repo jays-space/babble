@@ -24,5 +24,11 @@ export type AmplifyDependentResourcesAttributes = {
             "LambdaExecutionRole": "string",
             "Region": "string"
         }
+    },
+    "storage": {
+        "babbleS3": {
+            "BucketName": "string",
+            "Region": "string"
+        }
     }
 }

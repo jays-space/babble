@@ -1,0 +1,13 @@
+{
+  "resourceName": "babbleS3",
+  "policyUUID": "79105080",
+  "bucketName": "babbled7ac771c18bc44c78aa794a0d159e69c",
+  "storageAccess": "auth",
+  "guestAccess": [],
+  "authAccess": [
+    "CREATE_AND_UPDATE",
+    "READ"
+  ],
+  "triggerFunction": "NONE",
+  "groupAccess": {}
+}

@@ -65,5 +65,12 @@
       "providerPlugin": "awscloudformation",
       "service": "Lambda"
     }
+  },
+  "storage": {
+    "babbleS3": {
+      "service": "S3",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": []
+    }
   }
 }

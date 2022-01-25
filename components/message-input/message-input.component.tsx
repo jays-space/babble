@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   TextInput,
@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  Image,
 } from "react-native";
 import {
   AntDesign,
@@ -15,6 +16,8 @@ import {
   SimpleLineIcons,
 } from "@expo/vector-icons";
 import EmojiSelector from "react-native-emoji-selector";
+import * as ImagePicker from "expo-image-picker";
+import * as Device from "expo-device";
 
 //AWS
 import { Auth, DataStore } from "aws-amplify";
@@ -26,9 +29,31 @@ import { Message, ChatRoom } from "../../src/models";
 import { styles } from "./message-input.styles";
 
 export default function MessageInput({ chatRoom }) {
+  const [device, setDevice] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState("");
   const [isEmojiPickerVisible, setIsEmojiPickerVisible] =
     useState<boolean>(false);
+  const [image, setImage] = useState<string | null>(null);
+
+  //* get phone camera and image lib permissions
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS !== "web") {
+        setDevice(Device?.modelId);
+        // const libraryResponse =
+        //   await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const cameraResponse =
+          await ImagePicker.requestCameraPermissionsAsync();
+
+        if (
+          // libraryResponse.status !== "granted" ||
+          cameraResponse.status !== "granted"
+        ) {
+          alert("Sorry, we need camera roll permissions to make this work");
+        }
+      }
+    })();
+  }, []);
 
   const sendMessage = async () => {
     const {
@@ -78,12 +103,60 @@ export default function MessageInput({ chatRoom }) {
     setIsEmojiPickerVisible(!isEmojiPickerVisible);
   };
 
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      presentationStyle: device === "iPhone7,2" ? 0 : 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
+  };
+
+  const takePhoto = async () => {    
+    let result = await ImagePicker.launchCameraAsync({
+      presentationStyle: device === "iPhone7,2" ? 0 : 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setImage(result.uri);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={80}
       style={[styles.root, { height: isEmojiPickerVisible ? "50%" : "auto" }]}
     >
+      {/* picked image to send */}
+      {image && (
+        <View style={styles.sendImageContainer}>
+          <Image
+            source={{ uri: image }}
+            style={{ width: 100, height: 100, borderRadius: 10 }}
+          />
+
+          {/* //* cancel button */}
+          <TouchableOpacity onPress={() => setImage(null)}>
+            <AntDesign
+              name="close"
+              size={24}
+              color={styles.emoteSmileBtn.color}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+
       <View style={styles.inputContainerWrapper}>
         <View style={styles.inputContainer}>
           {/* emoji btn*/}
@@ -106,12 +179,24 @@ export default function MessageInput({ chatRoom }) {
           />
 
           {/* other btn container*/}
-          <Feather
-            name="camera"
-            size={24}
-            color={styles.emoteSmileBtn.color}
-            style={styles.emoteSmileBtn}
-          />
+          <TouchableOpacity onPress={pickImage}>
+            <Feather
+              name="image"
+              size={24}
+              color={styles.emoteSmileBtn.color}
+              style={styles.emoteSmileBtn}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={takePhoto}>
+            <Feather
+              name="camera"
+              size={24}
+              color={styles.emoteSmileBtn.color}
+              style={styles.emoteSmileBtn}
+            />
+          </TouchableOpacity>
+
           <MaterialCommunityIcons
             name="microphone-outline"
             size={24}
