@@ -1,6 +1,13 @@
 import { Auth, DataStore } from "aws-amplify";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Text,
+  View,
+  useWindowDimensions,
+  TouchableOpacity,
+} from "react-native";
+import { S3Image } from "aws-amplify-react-native";
 
 //MODELS
 import { User } from "../../src/models";
@@ -10,6 +17,8 @@ import { styles } from "./message.styles";
 
 // TODO: type definitions
 export default function Message({ message }) {
+  const { width } = useWindowDimensions();
+
   //* query User model to get the user data
   const [messageSender, setMessageSender] = useState<User | undefined>();
   const [isCurrentUserMessage, setIsCurrentUserMessage] =
@@ -53,15 +62,34 @@ export default function Message({ message }) {
           : styles.senderSpeechBubbleColor,
       ]}
     >
-      <Text
-        style={
-          isCurrentUserMessage
-            ? styles.currentUserMessageColor
-            : styles.senderMessageColor
-        }
-      >
-        {message.content}
-      </Text>
+      {/* image content */}
+      {message.image && (
+        // TODO: on image press, show whole picture in a new screen/modal
+        <TouchableOpacity>
+          <S3Image
+            imgKey={message.image}
+            style={{
+              width: width * 0.7,
+              aspectRatio: 4 / 3,
+              marginBottom: !!message.content ? 10 : 0,
+            }}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
+      )}
+
+      {/* text content */}
+      {!!message.content && (
+        <Text
+          style={
+            isCurrentUserMessage
+              ? styles.currentUserMessageColor
+              : styles.senderMessageColor
+          }
+        >
+          {message.content}
+        </Text>
+      )}
     </View>
   );
 }

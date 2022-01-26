@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderWidth: 1,
     borderColor: theme.primary.main,
-    borderRadius: 10,    
+    borderRadius: 10,
   },
   inputContainerWrapper: {
     flexDirection: "row",
@@ -32,6 +32,17 @@ export const styles = StyleSheet.create({
     borderColor: "#DEDEDE",
     backgroundColor: theme.grey.ultraLightGrey,
     alignItems: "center",
+  },
+  progressBarContainer: {
+    marginLeft: 5,
+    flex: 1,
+    justifyContent: "flex-start",
+    alignSelf: "flex-end",
+  },
+  progressBar: {
+    height: 5,
+    backgroundColor: theme.primary.main,
+    borderRadius: 5,
   },
   emoteSmileBtn: {
     marginHorizontal: 5,

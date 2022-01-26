@@ -3,7 +3,7 @@
   "serviceConfiguration": {
     "apiName": "Babble",
     "serviceName": "AppSync",
-    "gqlSchemaPath": "/tmp/amplify-ad8a3727-cd5f-4979-bcd8-3dcf3b88a366/amplify/backend/api/Babble/schema.graphql",
+    "gqlSchemaPath": "/tmp/amplify-3368e377-e9b2-4648-95b5-d34001d68f67/amplify/backend/api/Babble/schema.graphql",
     "defaultAuthType": {
       "mode": "API_KEY",
       "keyDescription": "api key description",
