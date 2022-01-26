@@ -7,6 +7,7 @@ import {
   Platform,
   Keyboard,
   Image,
+  Text,
 } from "react-native";
 import {
   AntDesign,
@@ -16,6 +17,7 @@ import {
   SimpleLineIcons,
 } from "@expo/vector-icons";
 import EmojiSelector from "react-native-emoji-selector";
+import { Audio, AVPlaybackStatus } from "expo-av";
 import * as ImagePicker from "expo-image-picker";
 import * as Device from "expo-device";
 import "react-native-get-random-values";
@@ -27,18 +29,26 @@ import { Auth, DataStore, Storage } from "aws-amplify";
 //MODELS
 import { Message, ChatRoom } from "../../src/models";
 
+//COMPONENTS
+import AudioPlayer from "../audio-player";
+
 //STYLES
 import { styles } from "./message-input.styles";
 
 export default function MessageInput({ chatRoom }) {
   const [currentUserID, setCurrentUserID] = useState<string | null>(null);
   const [device, setDevice] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState<string | "">("");
+  const [newImage, setNewImage] = useState<string | null>(null);
+  const [recording, setRecording] = useState<Audio.Recording | null>(null);
+
+  const [recordedAudioUri, setRecordedAudioUri] = useState<string | null>(null);
+
   const [progress, setProgress] = useState(0);
   const [isEmojiPickerVisible, setIsEmojiPickerVisible] =
     useState<boolean>(false);
-  const [newImage, setNewImage] = useState<string | null>(null);
 
+  //* get currentUser
   useEffect(() => {
     const getCurrentUserID = async () => {
       const {
@@ -51,7 +61,7 @@ export default function MessageInput({ chatRoom }) {
     getCurrentUserID();
   }, []);
 
-  //* get phone camera and image lib permissions
+  //* get phone permissions
   useEffect(() => {
     (async () => {
       if (Platform.OS !== "web") {
@@ -60,6 +70,7 @@ export default function MessageInput({ chatRoom }) {
         //   await ImagePicker.requestMediaLibraryPermissionsAsync();
         const cameraResponse =
           await ImagePicker.requestCameraPermissionsAsync();
+        await Audio.requestPermissionsAsync();
 
         if (
           // libraryResponse.status !== "granted" ||
@@ -71,8 +82,102 @@ export default function MessageInput({ chatRoom }) {
     })();
   }, []);
 
+  //* Get blob
+  const getBlob = async (uri: string) => {
+    if (!recordedAudioUri) {
+      return null;
+    }
+
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    return blob;
+  };
+
+  //* launch image picker
+  const pickImage = async () => {
+    // No permissions request is necessary for launching the image library
+    let result = await ImagePicker.launchImageLibraryAsync({
+      presentationStyle: device === "iPhone7,2" ? 0 : 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setNewImage(result.uri);
+    }
+  };
+
+  //* launch camera
+  const takePhoto = async () => {
+    // TODO: video support?
+    let result = await ImagePicker.launchCameraAsync({
+      presentationStyle: device === "iPhone7,2" ? 0 : 1,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.cancelled) {
+      setNewImage(result.uri);
+    }
+  };
+
+  //* start recoding
+  const startRecording = async () => {
+    try {
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      console.log("Starting recording..");
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RECORDING_OPTIONS_PRESET_HIGH_QUALITY
+      );
+      setRecording(recording);
+      console.log("Recording started");
+    } catch (err) {
+      console.error("Failed to start recording", err);
+    }
+  };
+
+  //* stop recording
+  const stopRecording = async () => {
+    console.log("Stopping recording..");
+    if (!recording) {
+      return;
+    }
+
+    setRecording(null);
+    await recording.stopAndUnloadAsync();
+
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: false,
+    });
+
+    const uri = recording.getURI();
+    console.log("Recording stopped and stored at", uri);
+
+    if (!uri) {
+      return;
+    }
+    setRecordedAudioUri(uri);
+  };
+
+  const updateLastMessage = async (messageRefToUpdateWith) => {
+    await DataStore.save(
+      ChatRoom.copyOf(chatRoom, (updatedChatRoom) => {
+        updatedChatRoom.LastMessage = messageRefToUpdateWith;
+      })
+    );
+  };
+
+  //* Send message functionality
   const sendMessage = async () => {
-    //* Send message
     if (!currentUserID) {
       return;
     }
@@ -89,25 +194,13 @@ export default function MessageInput({ chatRoom }) {
     clearFieldsState();
   };
 
-  //* Get image blob
-  const getImageBlob = async () => {
-    if (!newImage) {
-      return null;
-    }
-
-    const response = await fetch(newImage);
-    const imageBlob = await response.blob();
-
-    return imageBlob;
-  };
-
   //* Send new image
   const sendNewImage = async () => {
     if (!currentUserID || !newImage) {
       return;
     }
 
-    const blob = await getImageBlob();
+    const blob = await getBlob(newImage);
     const { key } = await Storage.put(`${uuidv4()}.png`, blob, {
       progressCallback(progress) {
         setProgress(progress.loaded / progress.total);
@@ -127,12 +220,39 @@ export default function MessageInput({ chatRoom }) {
     updateLastMessage(newMessageRef);
   };
 
-  const updateLastMessage = async (messageRefToUpdateWith) => {
-    await DataStore.save(
-      ChatRoom.copyOf(chatRoom, (updatedChatRoom) => {
-        updatedChatRoom.LastMessage = messageRefToUpdateWith;
+  //* Send new audio
+  const sendNewAudio = async () => {
+    if (!currentUserID || !recordedAudioUri) {
+      return;
+    }
+
+    const uriParts = recordedAudioUri.split(".");
+    const fileType = uriParts[uriParts.length - 1];
+
+    const blob = await getBlob(recordedAudioUri);
+
+    const { key } = await Storage.put(`${uuidv4()}.${fileType}`, blob, {
+      progressCallback(progress) {
+        setProgress(progress.loaded / progress.total);
+      },
+    });
+
+    const newMessageRef = await DataStore.save(
+      new Message({
+        content: newMessage,
+        audio: key,
+        userID: currentUserID,
+        chatroomID: chatRoom.id,
       })
     );
+
+    // updateLastMessage(newMessageRef);
+    clearFieldsState();
+  };
+
+  const toggleEmojiPickerVisibility = () => {
+    Keyboard.dismiss();
+    setIsEmojiPickerVisible(!isEmojiPickerVisible);
   };
 
   const clearFieldsState = () => {
@@ -140,6 +260,9 @@ export default function MessageInput({ chatRoom }) {
     setNewMessage("");
     setNewImage(null);
     setProgress(0);
+
+    setRecordedAudioUri(null);
+    setRecording(null);
   };
 
   const onPlusPress = () => {
@@ -153,45 +276,12 @@ export default function MessageInput({ chatRoom }) {
 
     if (newImage) {
       sendNewImage();
+    } else if (recordedAudioUri) {
+      sendNewAudio();
     } else if (newMessage) {
       sendMessage();
     } else {
       onPlusPress();
-    }
-  };
-
-  const toggleEmojiPickerVisibility = () => {
-    Keyboard.dismiss();
-    setIsEmojiPickerVisible(!isEmojiPickerVisible);
-  };
-
-  const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
-    let result = await ImagePicker.launchImageLibraryAsync({
-      presentationStyle: device === "iPhone7,2" ? 0 : 1,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-      setNewImage(result.uri);
-    }
-  };
-
-  const takePhoto = async () => {
-    // TODO: video support?
-    let result = await ImagePicker.launchCameraAsync({
-      presentationStyle: device === "iPhone7,2" ? 0 : 1,
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-      setNewImage(result.uri);
     }
   };
 
@@ -201,9 +291,9 @@ export default function MessageInput({ chatRoom }) {
       keyboardVerticalOffset={80}
       style={[styles.root, { height: isEmojiPickerVisible ? "50%" : "auto" }]}
     >
-      {/* picked image to send */}
+      {/* //* picked image preview */}
       {newImage && (
-        <View style={styles.sendImageContainer}>
+        <View style={styles.previewContainer}>
           <Image
             source={{ uri: newImage }}
             style={{ width: 100, height: 100, borderRadius: 10 }}
@@ -216,7 +306,7 @@ export default function MessageInput({ chatRoom }) {
             />
           </View>
 
-          {/* //* cancel button */}
+          {/* cancel button */}
           <TouchableOpacity onPress={() => setNewImage(null)}>
             <AntDesign
               name="close"
@@ -224,6 +314,23 @@ export default function MessageInput({ chatRoom }) {
               color={styles.emoteSmileBtn.color}
             />
           </TouchableOpacity>
+        </View>
+      )}
+
+      {/* //* recorded audio preview */}
+      {recordedAudioUri && (
+        <View style={{ flexDirection: "column" }}>
+          <AudioPlayer audioUri={recordedAudioUri} previewer />
+
+          {/* progress bar */}
+          <View style={styles.progressBarContainer}>
+            <View
+              style={[
+                styles.progressBar,
+                { flex: 1, width: `${progress * 100}%` },
+              ]}
+            />
+          </View>
         </View>
       )}
 
@@ -267,12 +374,21 @@ export default function MessageInput({ chatRoom }) {
             />
           </TouchableOpacity>
 
-          <MaterialCommunityIcons
-            name="microphone-outline"
-            size={24}
-            color={styles.emoteSmileBtn.color}
-            style={styles.emoteSmileBtn}
-          />
+          <TouchableOpacity
+            onPressIn={startRecording}
+            onPressOut={stopRecording}
+          >
+            <MaterialCommunityIcons
+              name={recording ? "microphone" : "microphone-outline"}
+              size={24}
+              color={
+                recording
+                  ? styles.recordBtnActive.color
+                  : styles.recordBtn.color
+              }
+              style={{ marginHorizontal: 5 }}
+            />
+          </TouchableOpacity>
         </View>
 
         <TouchableOpacity
@@ -280,7 +396,7 @@ export default function MessageInput({ chatRoom }) {
           onPress={handlePrimaryButtonPress}
         >
           {/* if state.newMessage is set, show the send icon, else the plus icon */}
-          {newMessage || newImage ? (
+          {newMessage || newImage || recordedAudioUri ? (
             <Ionicons
               name="send"
               size={18}

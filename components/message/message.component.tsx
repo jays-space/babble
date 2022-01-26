@@ -1,7 +1,6 @@
-import { Auth, DataStore } from "aws-amplify";
 import { useEffect, useState } from "react";
+import { Auth, DataStore, Storage } from "aws-amplify";
 import {
-  ActivityIndicator,
   Text,
   View,
   useWindowDimensions,
@@ -11,6 +10,9 @@ import { S3Image } from "aws-amplify-react-native";
 
 //MODELS
 import { User } from "../../src/models";
+
+//COMPONENTS
+import AudioPlayer from "../audio-player";
 
 //STYLES
 import { styles } from "./message.styles";
@@ -23,10 +25,17 @@ export default function Message({ message }) {
   const [messageSender, setMessageSender] = useState<User | undefined>();
   const [isCurrentUserMessage, setIsCurrentUserMessage] =
     useState<boolean>(false);
+  const [audioUri, setAudioUri] = useState<any>(null);
 
   useEffect(() => {
     DataStore.query(User, message.userID).then(setMessageSender);
   }, []);
+
+  useEffect(() => {
+    if (message.audio) {
+      Storage.get(message.audio).then(setAudioUri);
+    }
+  }, [message]);
 
   useEffect(() => {
     const checkIfIsCurrentUserMessage = async () => {
@@ -53,7 +62,7 @@ export default function Message({ message }) {
   //   return <ActivityIndicator />;
   // }
 
-  return (
+  return message.image || !!message.content ? (
     <View
       style={[
         styles.speechBubble,
@@ -64,7 +73,7 @@ export default function Message({ message }) {
     >
       {/* image content */}
       {message.image && (
-        // TODO: on image press, show whole picture in a new screen/modal
+        // TODO: on image press, show whole picture in a new screen/modal (https://www.npmjs.com/package/react-native-lightbox)
         <TouchableOpacity>
           <S3Image
             imgKey={message.image}
@@ -90,6 +99,18 @@ export default function Message({ message }) {
           {message.content}
         </Text>
       )}
+    </View>
+  ) : (
+    <View
+      style={[
+        styles.audioBubble,
+        isCurrentUserMessage
+          ? styles.currentUserAudioBubbleColor
+          : styles.senderAudioBubbleColor,
+      ]}
+    >
+      {/* audio content */}
+      {audioUri && <AudioPlayer audioUri={audioUri} previewer={false} />}
     </View>
   );
 }

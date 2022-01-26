@@ -9,11 +9,12 @@ export const styles = StyleSheet.create({
     padding: 10,
     flexDirection: "column",
   },
-  sendImageContainer: {
+  previewContainer: {
     marginBottom: 20,
     padding: 10,
     flexDirection: "row",
     alignSelf: "stretch",
+    // alignItems: "center",
     justifyContent: "space-between",
     borderWidth: 1,
     borderColor: theme.primary.main,
@@ -44,9 +45,31 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.primary.main,
     borderRadius: 5,
   },
+  audioPlayerProgressBar: {
+    height: 3,
+    marginHorizontal: 10,
+    flex: 1,
+    alignSelf: "center",
+    backgroundColor: theme.grey.lightgrey,
+    borderRadius: 3,
+  },
+  audioPlayerProgressBarMarker: {
+    width: 8,
+    height: 8,
+    borderRadius: 8,
+    backgroundColor: theme.primary.main,
+    position: "absolute",
+    top: -2.5,
+  },
   emoteSmileBtn: {
     marginHorizontal: 5,
     color: theme.grey.default,
+  },
+  recordBtn: {
+    color: theme.grey.default,
+  },
+  recordBtnActive: {
+    color: "red",
   },
   input: {
     flex: 1,
