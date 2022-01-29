@@ -7,24 +7,25 @@ export const styles = StyleSheet.create({
   speechBubble: {
     width: "auto",
     maxWidth: "75%",
-    padding: 10,
+    padding: 12,
     margin: 10,
     borderRadius: 10,
+    // flexDirection: "row",
   },
-  currentUserSpeechBubbleColor: {
+  senderSpeechBubbleColor: {
     backgroundColor: theme.primary.main,
     marginLeft: 10,
     marginRight: "auto",
   },
-  currentUserMessageColor: {
+  senderMessageColor: {
     color: theme.white.default,
   },
-  senderSpeechBubbleColor: {
+  currentUserSpeechBubbleColor: {
     backgroundColor: "lightgrey",
     marginLeft: "auto",
     marginRight: 10,
   },
-  senderMessageColor: {
+  currentUserMessageColor: {
     color: theme.black.default,
   },
   audioBubble: {
@@ -42,5 +43,15 @@ export const styles = StyleSheet.create({
     backgroundColor: theme.primary.main,
     marginLeft: 10,
     marginRight: "auto",
+  },
+  messageContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  checkmarkDefaultColor: {
+    color: theme.grey.default,
+  },
+  checkmarkReadColor: {
+    color: theme.primary.main,
   },
 });

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import formatDistance from "date-fns/formatDistance";
 
 //AWS
 import { Auth, DataStore } from "aws-amplify";
@@ -70,6 +71,14 @@ export default function ChatRoomItem({ chatRoom }) {
     navigation.navigate("ChatRoom", { id: chatRoom.id });
   };
 
+  const getTime = () => {
+    if (lastMessage?.createdAt) {
+      const format = Date.parse(lastMessage?.createdAt);
+      const final = formatDistance(format, new Date());
+      return final + " ago";
+    }
+  };
+
   if (!user) {
     return <ActivityIndicator />;
   }
@@ -97,7 +106,8 @@ export default function ChatRoomItem({ chatRoom }) {
       <View style={styles.contentContainer}>
         <View style={styles.content}>
           <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.text}>{lastMessage?.createdAt}</Text>
+
+          <Text style={styles.text}>{getTime()}</Text>
         </View>
 
         <Text numberOfLines={1} style={styles.text}>

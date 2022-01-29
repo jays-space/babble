@@ -11,7 +11,12 @@ import {
 import { Auth, DataStore } from "aws-amplify";
 
 //MODELS
-import { ChatRoom, ChatRoomUser } from "../src/models";
+import {
+  ChatRoom,
+  ChatRoomUser,
+  Message,
+  Message as MessageModel,
+} from "../src/models";
 
 //COMPONENTS
 import ChatRoomItem from "../components/chatroom-item";
@@ -37,6 +42,8 @@ export default function HomeScreen() {
     };
 
     fetchChatRooms();
+
+    return () => setChatRooms([]);
   }, []);
 
   const handleSignOut = () => {

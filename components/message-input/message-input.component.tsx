@@ -34,6 +34,7 @@ import AudioPlayer from "../audio-player";
 
 //STYLES
 import { styles } from "./message-input.styles";
+import { MessageStatus } from "../../src/models";
 
 export default function MessageInput({ chatRoom }) {
   const [currentUserID, setCurrentUserID] = useState<string | null>(null);
@@ -84,10 +85,6 @@ export default function MessageInput({ chatRoom }) {
 
   //* Get blob
   const getBlob = async (uri: string) => {
-    if (!recordedAudioUri) {
-      return null;
-    }
-
     const response = await fetch(uri);
     const blob = await response.blob();
 
@@ -187,6 +184,7 @@ export default function MessageInput({ chatRoom }) {
         content: newMessage,
         userID: currentUserID,
         chatroomID: chatRoom.id,
+        status: MessageStatus.SENT,
       })
     );
 
@@ -201,11 +199,14 @@ export default function MessageInput({ chatRoom }) {
     }
 
     const blob = await getBlob(newImage);
+
     const { key } = await Storage.put(`${uuidv4()}.png`, blob, {
       progressCallback(progress) {
         setProgress(progress.loaded / progress.total);
       },
     });
+
+    // console.log("key: ", key);
 
     const newMessageRef = await DataStore.save(
       new Message({
@@ -213,11 +214,14 @@ export default function MessageInput({ chatRoom }) {
         image: key,
         userID: currentUserID,
         chatroomID: chatRoom.id,
+        status: MessageStatus.SENT,
       })
     );
 
     clearFieldsState();
     updateLastMessage(newMessageRef);
+
+    // permanently delete
   };
 
   //* Send new audio
@@ -243,10 +247,11 @@ export default function MessageInput({ chatRoom }) {
         audio: key,
         userID: currentUserID,
         chatroomID: chatRoom.id,
+        status: MessageStatus.SENT,
       })
     );
 
-    // updateLastMessage(newMessageRef);
+    updateLastMessage(newMessageRef);
     clearFieldsState();
   };
 
@@ -275,10 +280,13 @@ export default function MessageInput({ chatRoom }) {
     //* if there is a new message in state, envoke message send function
 
     if (newImage) {
+      console.log("send image");
       sendNewImage();
     } else if (recordedAudioUri) {
+      console.log("send audio");
       sendNewAudio();
     } else if (newMessage) {
+      console.log("send text");
       sendMessage();
     } else {
       onPlusPress();
