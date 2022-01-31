@@ -78,7 +78,7 @@ function App() {
   useEffect(() => {
     const interval = setInterval(async () => {
       await updateLastOnline();
-    }, 50000);
+    }, 3 * 60 * 1000); //3min
 
     return () => clearInterval(interval);
   }, [currentUser]);
