@@ -70,7 +70,7 @@ export default function Message({ message: MessageProp }) {
         attributes: { sub: currentUserID },
       } = await Auth.currentAuthenticatedUser();
 
-      setIsCurrentUserMessage(messageSender.id !== currentUserID);
+      setIsCurrentUserMessage(messageSender.id === currentUserID);
     };
 
     checkIfIsCurrentUserMessage();
@@ -107,8 +107,8 @@ export default function Message({ message: MessageProp }) {
       style={[
         styles.speechBubble,
         isCurrentUserMessage
-          ? styles.senderSpeechBubbleColor
-          : styles.currentUserSpeechBubbleColor,
+        ? styles.currentUserSpeechBubbleColor
+        : styles.senderSpeechBubbleColor
       ]}
     >
       {/* image content */}
@@ -135,17 +135,17 @@ export default function Message({ message: MessageProp }) {
           <Text
             style={[
               isCurrentUserMessage
-                ? styles.senderMessageColor
-                : styles.currentUserMessageColor,
-              !isCurrentUserMessage && !!message?.status && { maxWidth: "92%" },
+              ? styles.currentUserMessageColor
+              : styles.senderMessageColor,
+              isCurrentUserMessage && !!message?.status && { maxWidth: "92%" },
             ]}
           >
-            {message.content}
+            {message.content} 
           </Text>
         )}
 
         {/* message status */}
-        {!isCurrentUserMessage && !!message?.status && (
+        {isCurrentUserMessage && !!message?.status && (
           <View
             style={[
               !!message.image && { flex: 1, marginTop: 5 },
@@ -181,15 +181,15 @@ export default function Message({ message: MessageProp }) {
       style={[
         styles.audioBubble,
         isCurrentUserMessage
-          ? styles.senderAudioBubbleColor
-          : styles.currentUserAudioBubbleColor,
+        ? styles.currentUserAudioBubbleColor
+        : styles.senderAudioBubbleColor
       ]}
     >
       {/* audio content */}
       {audioUri && <AudioPlayer audioUri={audioUri} previewer={false} />}
 
       {/* message status */}
-      {!isCurrentUserMessage && !!message?.status && (
+      {isCurrentUserMessage && !!message?.status && (
         <Ionicons
           name={
             message?.status === MessageStatus.SENT

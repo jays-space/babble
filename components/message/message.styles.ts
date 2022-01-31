@@ -34,12 +34,12 @@ export const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 10,
   },
-  senderAudioBubbleColor: {
+  currentUserAudioBubbleColor: {
     backgroundColor: "lightgrey",
     marginLeft: "auto",
     marginRight: 10,
   },
-  currentUserAudioBubbleColor: {
+  senderAudioBubbleColor: {
     backgroundColor: theme.primary.main,
     marginLeft: 10,
     marginRight: "auto",
