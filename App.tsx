@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
@@ -5,15 +6,19 @@ import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
 import Navigation from "./navigation";
 
-import { Amplify, DataStore, Hub } from "aws-amplify";
+import { Amplify, Auth, DataStore, Hub } from "aws-amplify";
 import { withAuthenticator } from "aws-amplify-react-native";
 
 import awsconfig from "./src/aws-exports.js";
-import { useEffect } from "react";
-import { Message, MessageStatus } from "./src/models";
 Amplify.configure(awsconfig);
 
+//MODELS
+import { Message, MessageStatus, User as UserModel } from "./src/models";
+import { formatDistance } from "date-fns";
+
 function App() {
+  const [currentUser, setCurrentUser] = useState<UserModel | null>(null);
+
   const isLoadingComplete = useCachedResources();
   const colorScheme = useColorScheme();
 
@@ -49,6 +54,58 @@ function App() {
 
     // return () => listener.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    fetchCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    if (!currentUser) {
+      return;
+    }
+
+    const subscription = DataStore.observe(UserModel, currentUser.id).subscribe(
+      (msg) => {
+        if (msg.model === UserModel && msg.opType === "UPDATE") {
+          setCurrentUser(msg.element);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [currentUser?.id]);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      await updateLastOnline();
+    }, 50000);
+
+    return () => clearInterval(interval);
+  }, [currentUser]);
+
+  const fetchCurrentUser = async () => {
+    const {
+      attributes: { sub: currentUserID },
+    } = await Auth.currentAuthenticatedUser();
+
+    const user = await DataStore.query(UserModel, currentUserID);
+
+    if (user) {
+      setCurrentUser(user);
+    }
+  };
+
+  const updateLastOnline = async () => {
+    if (!currentUser) {
+      return;
+    }
+
+    await DataStore.save(
+      UserModel.copyOf(currentUser, (updated) => {
+        updated.lastOnlineAt = +new Date();
+      })
+    );
+  };
 
   if (!isLoadingComplete) {
     return null;

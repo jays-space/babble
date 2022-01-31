@@ -86,10 +86,13 @@ function RootNavigator() {
         name="ChatRoom"
         component={ChatRoomScreen}
         options={({ route }) => ({
-          headerTitle: () => <ChatRoomScreenHeader chatRoomID={route.params?.id} />,
+          headerTitle: () => (
+            <ChatRoomScreenHeader chatRoomID={route.params?.id} />
+          ),
           headerBackTitleVisible: false,
           headerStyle: {
             backgroundColor: theme.primary.main,
+            height: 200,
           },
           headerTintColor: theme.white.default,
         })}
