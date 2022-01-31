@@ -54,4 +54,10 @@ export const styles = StyleSheet.create({
   checkmarkReadColor: {
     color: theme.primary.main,
   },
+  repliedTo: {
+    marginBottom: 10,
+    backgroundColor: "#b1b1b1",
+    padding: 5,
+    borderRadius: 5,
+  }
 });

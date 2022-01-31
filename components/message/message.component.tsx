@@ -5,6 +5,7 @@ import {
   View,
   useWindowDimensions,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { S3Image } from "aws-amplify-react-native";
 
@@ -19,7 +20,7 @@ import { styles } from "./message.styles";
 import { Ionicons } from "@expo/vector-icons";
 
 // TODO: type definitions
-export default function Message({ message: MessageProp }) {
+export default function Message({ message: MessageProp, setAsMessageReply }) {
   const { width } = useWindowDimensions();
 
   //* query User model to get the user data
@@ -29,6 +30,9 @@ export default function Message({ message: MessageProp }) {
   >(null);
   const [audioUri, setAudioUri] = useState<any>(null);
   const [message, setMessage] = useState<MessageModel>(MessageProp);
+  const [repliedTo, setRepliedTo] = useState<MessageModel | undefined>(
+    undefined
+  );
 
   //* real time sync -> obsetve messageModel by message.id
   useEffect(() => {
@@ -49,6 +53,14 @@ export default function Message({ message: MessageProp }) {
 
     return () => subscription.unsubscribe();
   });
+
+  useEffect(() => {
+    if (message.replyToMessageID) {
+      DataStore.query(MessageModel, message.replyToMessageID).then(
+        setRepliedTo
+      );
+    }
+  }, [message]);
 
   useEffect(() => {
     DataStore.query(User, message.userID).then(setMessageSender);
@@ -77,6 +89,10 @@ export default function Message({ message: MessageProp }) {
   }, [messageSender]);
 
   useEffect(() => {
+    setMessage(MessageProp);
+  }, [MessageProp]);
+
+  useEffect(() => {
     setMessageAsRead();
   }, [isCurrentUserMessage]);
 
@@ -103,86 +119,104 @@ export default function Message({ message: MessageProp }) {
   };
 
   return message.image || !!message.content ? (
-    <View
-      style={[
-        styles.speechBubble,
-        isCurrentUserMessage
-        ? styles.currentUserSpeechBubbleColor
-        : styles.senderSpeechBubbleColor
-      ]}
-    >
-      {/* image content */}
-      {message.image && (
-        // TODO: on image press, show whole picture in a new screen/modal (https://www.npmjs.com/package/react-native-lightbox)
-        <TouchableOpacity>
-          <S3Image
-            imgKey={message.image}
-            style={{
-              width: width * 0.7,
-              aspectRatio: 4 / 3,
-              marginBottom: !!message.content ? 10 : 0,
-              borderRadius: 10,
-            }}
-            resizeMode="cover"
-          />
-          {/* <Text>{message.image}</Text> */}
-        </TouchableOpacity>
-      )}
-
-      <View style={styles.messageContainer}>
-        {/* text content */}
-        {!!message.content && (
-          <Text
-            style={[
-              isCurrentUserMessage
-              ? styles.currentUserMessageColor
-              : styles.senderMessageColor,
-              isCurrentUserMessage && !!message?.status && { maxWidth: "92%" },
-            ]}
-          >
-            {message.content} 
-          </Text>
-        )}
-
-        {/* message status */}
-        {isCurrentUserMessage && !!message?.status && (
-          <View
-            style={[
-              !!message.image && { flex: 1, marginTop: 5 },
-              {
-                justifyContent: "flex-end",
-                alignItems: "flex-end",
-              },
-            ]}
-          >
-            <Ionicons
-              name={
-                message?.status === MessageStatus.SENT
-                  ? "checkmark"
-                  : "checkmark-done"
-              }
-              size={16}
-              color={
-                message?.status === MessageStatus.READ
-                  ? styles.checkmarkReadColor.color
-                  : styles.checkmarkDefaultColor.color
-              }
-              style={[
-                !message.image && { marginLeft: 5 },
-                { alignSelf: "flex-end" },
-              ]}
-            />
+    <View>
+      <TouchableOpacity
+        onLongPress={setAsMessageReply}
+        style={[
+          styles.speechBubble,
+          isCurrentUserMessage
+            ? styles.currentUserSpeechBubbleColor
+            : styles.senderSpeechBubbleColor,
+        ]}
+      >
+        {/* //* message reply */}
+        {repliedTo && (
+          <View style={styles.repliedTo}>
+            <Text>
+              Replied to:{" "}
+              {repliedTo.content
+                ? repliedTo.content
+                : repliedTo.audio
+                ? "audio"
+                : "image"}
+            </Text>
           </View>
         )}
-      </View>
+
+        {/* image content */}
+        {message.image && (
+          // TODO: on image press, show whole picture in a new screen/modal (https://www.npmjs.com/package/react-native-lightbox)
+          <TouchableOpacity>
+            <S3Image
+              imgKey={message.image}
+              style={{
+                width: width * 0.7,
+                aspectRatio: 4 / 3,
+                marginBottom: !!message.content ? 10 : 0,
+                borderRadius: 10,
+              }}
+              resizeMode="cover"
+            />
+            {/* <Text>{message.image}</Text> */}
+          </TouchableOpacity>
+        )}
+
+        <View style={styles.messageContainer}>
+          {/* text content */}
+          {!!message.content && (
+            <Text
+              style={[
+                isCurrentUserMessage
+                  ? styles.currentUserMessageColor
+                  : styles.senderMessageColor,
+                isCurrentUserMessage &&
+                  !!message?.status && { maxWidth: "92%" },
+              ]}
+            >
+              {message.content}
+            </Text>
+          )}
+
+          {/* message status */}
+          {isCurrentUserMessage && !!message?.status && (
+            <View
+              style={[
+                !!message.image && { flex: 1, marginTop: 5 },
+                {
+                  justifyContent: "flex-end",
+                  alignItems: "flex-end",
+                },
+              ]}
+            >
+              <Ionicons
+                name={
+                  message?.status === MessageStatus.SENT
+                    ? "checkmark"
+                    : "checkmark-done"
+                }
+                size={16}
+                color={
+                  message?.status === MessageStatus.READ
+                    ? styles.checkmarkReadColor.color
+                    : styles.checkmarkDefaultColor.color
+                }
+                style={[
+                  !message.image && { marginLeft: 5 },
+                  { alignSelf: "flex-end" },
+                ]}
+              />
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
     </View>
   ) : (
     <View
       style={[
         styles.audioBubble,
         isCurrentUserMessage
-        ? styles.currentUserAudioBubbleColor
-        : styles.senderAudioBubbleColor
+          ? styles.currentUserAudioBubbleColor
+          : styles.senderAudioBubbleColor,
       ]}
     >
       {/* audio content */}

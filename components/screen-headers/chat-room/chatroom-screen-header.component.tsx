@@ -48,7 +48,7 @@ export default function ChatRoomScreenHeader({ chatRoomID, children }) {
   useEffect(() => {
     const interval = setInterval(() => {
       checkOnlineStatus();
-    }, 5 * 60 * 1000); //5min
+    }, 3 * 60 * 1000); //1min
 
     return () => clearInterval(interval);
   }, [user]);

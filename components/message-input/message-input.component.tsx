@@ -27,16 +27,24 @@ import { v4 as uuidv4 } from "uuid";
 import { Auth, DataStore, Storage } from "aws-amplify";
 
 //MODELS
-import { Message, ChatRoom } from "../../src/models";
+import {
+  Message as MessageModel,
+  ChatRoom,
+  MessageStatus,
+} from "../../src/models";
 
 //COMPONENTS
 import AudioPlayer from "../audio-player";
+import MessageComponent from "../message/message.component";
 
 //STYLES
 import { styles } from "./message-input.styles";
-import { MessageStatus } from "../../src/models";
 
-export default function MessageInput({ chatRoom }) {
+export default function MessageInput({
+  chatRoom,
+  messageReplyTo,
+  removeMessageReplyTo,
+}) {
   const [currentUserID, setCurrentUserID] = useState<string | null>(null);
   const [device, setDevice] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState<string | "">("");
@@ -180,10 +188,11 @@ export default function MessageInput({ chatRoom }) {
     }
 
     const newMessageRef = await DataStore.save(
-      new Message({
+      new MessageModel({
         content: newMessage,
         userID: currentUserID,
         chatroomID: chatRoom.id,
+        replyToMessageID: messageReplyTo?.id,
         status: MessageStatus.SENT,
       })
     );
@@ -209,11 +218,12 @@ export default function MessageInput({ chatRoom }) {
     // console.log("key: ", key);
 
     const newMessageRef = await DataStore.save(
-      new Message({
+      new MessageModel({
         content: newMessage,
         image: key,
         userID: currentUserID,
         chatroomID: chatRoom.id,
+        replyToMessageID: messageReplyTo?.id,
         status: MessageStatus.SENT,
       })
     );
@@ -242,11 +252,12 @@ export default function MessageInput({ chatRoom }) {
     });
 
     const newMessageRef = await DataStore.save(
-      new Message({
+      new MessageModel({
         content: newMessage,
         audio: key,
         userID: currentUserID,
         chatroomID: chatRoom.id,
+        replyToMessageID: messageReplyTo?.id,
         status: MessageStatus.SENT,
       })
     );
@@ -265,7 +276,7 @@ export default function MessageInput({ chatRoom }) {
     setNewMessage("");
     setNewImage(null);
     setProgress(0);
-
+    removeMessageReplyTo();
     setRecordedAudioUri(null);
     setRecording(null);
   };
@@ -299,6 +310,36 @@ export default function MessageInput({ chatRoom }) {
       keyboardVerticalOffset={80}
       style={[styles.root, { height: isEmojiPickerVisible ? "50%" : "auto" }]}
     >
+      {/* //* message replies */}
+
+      {messageReplyTo && (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignSelf: "stretch",
+            padding: 10,
+            backgroundColor: "#f2f2f2",
+            borderRadius: 10,
+            marginBottom: 10,
+          }}
+        >
+          <View style={{ flex: 1 }}>
+            <Text>Reply to:</Text>
+            <MessageComponent message={messageReplyTo} />
+          </View>
+
+          {/* cancel button */}
+          <TouchableOpacity onPress={removeMessageReplyTo}>
+            <AntDesign
+              name="close"
+              size={24}
+              color={styles.emoteSmileBtn.color}
+            />
+          </TouchableOpacity>
+        </View>
+      )}
+
       {/* //* picked image preview */}
       {newImage && (
         <View style={styles.previewContainer}>
