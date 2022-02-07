@@ -30,9 +30,13 @@ export declare class ChatRoom {
   readonly Messages?: (Message | null)[];
   readonly ChatRoomUsers?: (ChatRoomUser | null)[];
   readonly newMessages?: number;
+  readonly Admin?: User;
+  readonly groupName?: string;
+  readonly imageUri?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
   readonly chatRoomLastMessageId?: string;
+  readonly chatRoomAdminId?: string;
   constructor(init: ModelInit<ChatRoom, ChatRoomMetaData>);
   static copyOf(source: ChatRoom, mutator: (draft: MutableModel<ChatRoom, ChatRoomMetaData>) => MutableModel<ChatRoom, ChatRoomMetaData> | void): ChatRoom;
 }

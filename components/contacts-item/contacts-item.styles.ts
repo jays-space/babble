@@ -50,4 +50,7 @@ export const styles = StyleSheet.create({
   text: {
     color: "grey",
   },
+  icons: {
+    color: theme.grey.default,
+  },
 });

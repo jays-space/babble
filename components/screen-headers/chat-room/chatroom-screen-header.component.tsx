@@ -12,7 +12,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Auth, DataStore } from "aws-amplify";
 
 //MODELS
-import { ChatRoomUser, User } from "../../../src/models";
+import { ChatRoom, ChatRoomUser, User } from "../../../src/models";
 
 // STYLES
 import { styles } from "./chatroom-screen-header.styles";
@@ -20,29 +20,36 @@ import { formatDistance } from "date-fns";
 
 export default function ChatRoomScreenHeader({ chatRoomID, children }) {
   const [user, setUser] = useState<User | null>(null);
+  const [allUsers, setAllUsers] = useState<User[]>([]);
+  const [chatRoom, setChatRoom] = useState<ChatRoom | undefined>(undefined);
   const { width } = useWindowDimensions();
+
+  const fetchAllUsers = async () => {
+    const fetchedUsers = (await DataStore.query(ChatRoomUser))
+      .filter(({ chatRoom: { id } }) => id === chatRoomID)
+      .map(({ user }) => user);
+
+    setAllUsers(fetchedUsers);
+
+    const {
+      attributes: { sub: currentUserID },
+    } = await Auth.currentAuthenticatedUser();
+
+    //* return user where user.id is not currentUserID
+    setUser(fetchedUsers.find((user) => user.id !== currentUserID) || null);
+  };
+
+  const fetchChatRoom = async () => {
+    await DataStore.query(ChatRoom, chatRoomID).then(setChatRoom);
+  };
 
   useEffect(() => {
     if (chatRoomID === null) {
       return;
     }
 
-    const fetchAllUsers = async () => {
-      const allUsers = (await DataStore.query(ChatRoomUser))
-        .filter(({ chatRoom: { id } }) => id === chatRoomID)
-        .map(({ user }) => user);
-
-      // setUsers(allUsers);
-
-      const {
-        attributes: { sub: currentUserID },
-      } = await Auth.currentAuthenticatedUser();
-
-      //* return user where user.id is not currentUserID
-      setUser(allUsers.find((user) => user.id !== currentUserID) || null);
-    };
-
     fetchAllUsers();
+    fetchChatRoom();
   }, []);
 
   useEffect(() => {
@@ -52,6 +59,11 @@ export default function ChatRoomScreenHeader({ chatRoomID, children }) {
 
     return () => clearInterval(interval);
   }, [user]);
+
+  //? returns bool based on whether or not there are more than two users in a chatroom
+  const isGroupChat = () => {
+    return allUsers.length > 2;
+  };
 
   const checkOnlineStatus = () => {
     if (!user?.lastOnlineAt) {
@@ -66,14 +78,17 @@ export default function ChatRoomScreenHeader({ chatRoomID, children }) {
       })}`;
     }
   };
-  // console.log(checkOnlineStatus());
+
+  const getUserNames = () => {
+    return allUsers.map((user) => user.name).join(", ");
+  };
 
   return (
     <View style={[styles.root, { width: width - 45 }]}>
       {/* Avatar */}
       <Image
         source={{
-          uri: user?.imageUri,
+          uri: chatRoom?.imageUri || user?.imageUri,
         }}
         style={styles.avatar}
       />
@@ -81,10 +96,12 @@ export default function ChatRoomScreenHeader({ chatRoomID, children }) {
       {/* Title - name and online status */}
       <View style={styles.titleContainer}>
         {/* Title - contact name */}
-        <Text style={styles.title}>{user?.name}</Text>
+        <Text style={styles.title}>{chatRoom?.groupName || user?.name}</Text>
 
         {/* Title - online status */}
-        <Text style={styles.subTitile}>{checkOnlineStatus()}</Text>
+        <Text numberOfLines={1} style={styles.subTitile}>
+          {isGroupChat() ? getUserNames() : checkOnlineStatus()}
+        </Text>
       </View>
 
       {/* Icons */}

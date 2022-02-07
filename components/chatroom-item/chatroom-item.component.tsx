@@ -91,7 +91,7 @@ export default function ChatRoomItem({ chatRoom }) {
       {/* avatar */}
       <Image
         source={{
-          uri: user.imageUri,
+          uri: chatRoom.imageUri || user.imageUri,
         }}
         style={styles.avatar}
       />
@@ -105,7 +105,7 @@ export default function ChatRoomItem({ chatRoom }) {
       {/* content container */}
       <View style={styles.contentContainer}>
         <View style={styles.content}>
-          <Text style={styles.name}>{user.name}</Text>
+          <Text style={styles.name}>{chatRoom.groupName || user.name}</Text>
 
           <Text style={styles.text}>{getTime()}</Text>
         </View>
