@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 import useCachedResources from "./hooks/useCachedResources";
 import useColorScheme from "./hooks/useColorScheme";
@@ -8,13 +9,13 @@ import Navigation from "./navigation";
 
 import { Amplify, Auth, DataStore, Hub } from "aws-amplify";
 import { withAuthenticator } from "aws-amplify-react-native";
+import { formatDistance } from "date-fns";
 
 import awsconfig from "./src/aws-exports.js";
 Amplify.configure(awsconfig);
 
 //MODELS
 import { Message, MessageStatus, User as UserModel } from "./src/models";
-import { formatDistance } from "date-fns";
 
 function App() {
   const [currentUser, setCurrentUser] = useState<UserModel | null>(null);
@@ -112,7 +113,9 @@ function App() {
   } else {
     return (
       <SafeAreaProvider>
-        <Navigation colorScheme={colorScheme} />
+        <ActionSheetProvider>
+          <Navigation colorScheme={colorScheme} />
+        </ActionSheetProvider>
         <StatusBar />
       </SafeAreaProvider>
     );

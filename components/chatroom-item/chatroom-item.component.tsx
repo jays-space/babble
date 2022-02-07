@@ -25,6 +25,7 @@ export default function ChatRoomItem({ chatRoom }) {
   const [lastMessage, setLastMessage] = useState<Message | undefined>(
     undefined
   );
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   //* the displayed user's details
   const [user, setUser] = useState<User | null>(null);
@@ -48,6 +49,7 @@ export default function ChatRoomItem({ chatRoom }) {
 
       //* return user where user.id is not currentUserID
       setUser(allUsers.find((user) => user.id !== currentUserID) || null);
+      setIsLoading(false);
 
       // console.log("allUsers: ", allUsers);
     };
@@ -79,7 +81,7 @@ export default function ChatRoomItem({ chatRoom }) {
     }
   };
 
-  if (!user) {
+  if (isLoading) {
     return <ActivityIndicator />;
   }
 

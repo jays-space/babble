@@ -31,8 +31,8 @@ export default function HomeScreen() {
         attributes: { sub: currentUserID },
       } = await Auth.currentAuthenticatedUser();
 
-      console.log("currentUserID: ", currentUserID);
-      console.log("user: ", await DataStore.query(User, currentUserID));
+      // console.log("currentUserID: ", currentUserID);
+      // console.log("user: ", await DataStore.query(User, currentUserID));
 
       /*
        * get all chatRoomUser data, filter all records where currentUser

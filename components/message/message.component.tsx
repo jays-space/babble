@@ -6,8 +6,10 @@ import {
   useWindowDimensions,
   TouchableOpacity,
   Pressable,
+  Alert,
 } from "react-native";
 import { S3Image } from "aws-amplify-react-native";
+import { useActionSheet } from "@expo/react-native-action-sheet";
 
 //MODELS
 import { MessageStatus, User, Message as MessageModel } from "../../src/models";
@@ -20,8 +22,13 @@ import { styles } from "./message.styles";
 import { Ionicons } from "@expo/vector-icons";
 
 // TODO: type definitions
-export default function Message({ message: MessageProp, setAsMessageReply }) {
+export default function Message({
+  message: MessageProp,
+  setAsMessageReply,
+  onLongPress,
+}) {
   const { width } = useWindowDimensions();
+  const { showActionSheetWithOptions } = useActionSheet();
 
   //* query User model to get the user data
   const [messageSender, setMessageSender] = useState<User | undefined>();
@@ -33,6 +40,7 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
   const [repliedTo, setRepliedTo] = useState<MessageModel | undefined>(
     undefined
   );
+  const [isDeleted, setIsDeleted] = useState<boolean>(false);
 
   //* real time sync -> obsetve messageModel by message.id
   useEffect(() => {
@@ -41,12 +49,16 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
         // }
 
         //* append new message to messages
-        if (message.model === MessageModel && message.opType === "UPDATE") {
-          // console.log(message.element);
-          setMessage((currentMessage) => ({
-            ...currentMessage,
-            ...message.element,
-          }));
+        if (message.model === MessageModel) {
+          if (message.opType === "UPDATE") {
+            // console.log(message.element);
+            setMessage((currentMessage) => ({
+              ...currentMessage,
+              ...message.element,
+            }));
+          } else if (message.opType === "DELETE") {
+            setIsDeleted(true);
+          }
         }
       }
     );
@@ -118,10 +130,62 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
     }
   };
 
+  const confirmDelete = async () => {
+    Alert.alert(
+      "Confirm Delete",
+      `Are you sure you want to delete this message`,
+      [
+        {
+          text: "Delete",
+          onPress: () => deleteMessage(),
+          style: "destructive",
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
+  };
+
+  const deleteMessage = async () => {
+    await DataStore.delete(message);
+  };
+
+  const onActionPress = (actionIndex) => {
+    //* reply to message
+    if (actionIndex === 0) {
+      setAsMessageReply();
+    }
+
+    //* delete message
+    if (actionIndex === 1 && isCurrentUserMessage) {
+      confirmDelete();
+    }
+  };
+
+  const openActionMenu = () => {
+    if (isCurrentUserMessage) {
+      const options = ["Reply to message", "Delete message", "Cancel"];
+      const destructiveButtonIndex = 1;
+      const cancelButtonIndex = 2;
+
+      showActionSheetWithOptions(
+        { options, destructiveButtonIndex, cancelButtonIndex },
+        onActionPress
+      );
+    } else {
+      const options = ["Reply to message", "Cancel"];
+      const cancelButtonIndex = 1;
+
+      showActionSheetWithOptions({ options, cancelButtonIndex }, onActionPress);
+    }
+  };
+
   return message.image || !!message.content ? (
     <View>
       <TouchableOpacity
-        onLongPress={setAsMessageReply}
+        onLongPress={openActionMenu}
         style={[
           styles.speechBubble,
           isCurrentUserMessage
@@ -144,7 +208,7 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
         )}
 
         {/* image content */}
-        {message.image && (
+        {message.image && !isDeleted && (
           // TODO: on image press, show whole picture in a new screen/modal (https://www.npmjs.com/package/react-native-lightbox)
           <TouchableOpacity>
             <S3Image
@@ -160,6 +224,7 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
             {/* <Text>{message.image}</Text> */}
           </TouchableOpacity>
         )}
+        {message.image && isDeleted && <Text>image deleted... </Text>}
 
         <View style={styles.messageContainer}>
           {/* text content */}
@@ -173,7 +238,7 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
                   !!message?.status && { maxWidth: "92%" },
               ]}
             >
-              {message.content}
+              {isDeleted ? "message deleted..." : message.content}
             </Text>
           )}
 
@@ -211,7 +276,8 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
       </TouchableOpacity>
     </View>
   ) : (
-    <View
+    <TouchableOpacity
+      onLongPress={openActionMenu}
       style={[
         styles.audioBubble,
         isCurrentUserMessage
@@ -220,7 +286,10 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
       ]}
     >
       {/* audio content */}
-      {audioUri && <AudioPlayer audioUri={audioUri} previewer={false} />}
+      {audioUri && !isDeleted && (
+        <AudioPlayer audioUri={audioUri} previewer={false} />
+      )}
+      {isDeleted && <Text>audio recording deleted... </Text>}
 
       {/* message status */}
       {isCurrentUserMessage && !!message?.status && (
@@ -239,6 +308,6 @@ export default function Message({ message: MessageProp, setAsMessageReply }) {
           style={{ marginTop: 5, alignSelf: "flex-end" }}
         />
       )}
-    </View>
+    </TouchableOpacity>
   );
 }

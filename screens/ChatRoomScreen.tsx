@@ -115,7 +115,11 @@ export default function ChatRoomScreen() {
       />
 
       {/* new message input */}
-      <MessageInput chatRoom={chatRoom} messageReplyTo={messageReplyTo} removeMessageReplyTo={() => setMessageReplyTo(null)} />
+      <MessageInput
+        chatRoom={chatRoom}
+        messageReplyTo={messageReplyTo}
+        removeMessageReplyTo={() => setMessageReplyTo(null)}
+      />
     </SafeAreaView>
   );
 }
