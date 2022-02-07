@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
+import { formatDistance } from "date-fns";
 
 //AWS
 import { Auth, DataStore } from "aws-amplify";
@@ -16,13 +18,14 @@ import { ChatRoom, ChatRoomUser, User } from "../../../src/models";
 
 // STYLES
 import { styles } from "./chatroom-screen-header.styles";
-import { formatDistance } from "date-fns";
 
 export default function ChatRoomScreenHeader({ chatRoomID, children }) {
   const [user, setUser] = useState<User | null>(null);
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [chatRoom, setChatRoom] = useState<ChatRoom | undefined>(undefined);
+
   const { width } = useWindowDimensions();
+  const navigation = useNavigation();
 
   const fetchAllUsers = async () => {
     const fetchedUsers = (await DataStore.query(ChatRoomUser))
@@ -83,26 +86,35 @@ export default function ChatRoomScreenHeader({ chatRoomID, children }) {
     return allUsers.map((user) => user.name).join(", ");
   };
 
+  const openInfo = () => {
+    // redirect to info page
+    navigation.navigate("GroupInfoScreen", { chatRoomID });
+  };
+
   return (
     <View style={[styles.root, { width: width - 45 }]}>
-      {/* Avatar */}
-      <Image
-        source={{
-          uri: chatRoom?.imageUri || user?.imageUri,
-        }}
-        style={styles.avatar}
-      />
+      <TouchableOpacity
+        style={{ flexDirection: "row", flex: 1 }}
+        onPress={openInfo}
+      >
+        {/* Avatar */}
+        <Image
+          source={{
+            uri: chatRoom?.imageUri || user?.imageUri,
+          }}
+          style={styles.avatar}
+        />
+        {/* Title - name and online status */}
+        <View style={styles.titleContainer}>
+          {/* Title - contact name */}
+          <Text style={styles.title}>{chatRoom?.groupName || user?.name}</Text>
 
-      {/* Title - name and online status */}
-      <View style={styles.titleContainer}>
-        {/* Title - contact name */}
-        <Text style={styles.title}>{chatRoom?.groupName || user?.name}</Text>
-
-        {/* Title - online status */}
-        <Text numberOfLines={1} style={styles.subTitile}>
-          {isGroupChat() ? getUserNames() : checkOnlineStatus()}
-        </Text>
-      </View>
+          {/* Title - online status */}
+          <Text numberOfLines={1} style={styles.subTitile}>
+            {isGroupChat() ? getUserNames() : checkOnlineStatus()}
+          </Text>
+        </View>
+      </TouchableOpacity>
 
       {/* Icons */}
       <View style={styles.iconsContainer}>

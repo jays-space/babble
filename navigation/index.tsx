@@ -31,6 +31,7 @@ import ChatRoomScreen from "../screens/ChatRoomScreen";
 //COMPONENTS
 import HomeScreenHeader from "../components/screen-headers/home-screen/home-screen-header.component";
 import ChatRoomScreenHeader from "../components/screen-headers/chat-room/chatroom-screen-header.component";
+import GroupInfoScreen from "../screens/GroupInfoScreen";
 
 export default function Navigation({
   colorScheme,
@@ -97,6 +98,8 @@ function RootNavigator() {
           headerTintColor: theme.white.default,
         })}
       />
+
+      <Stack.Screen name="GroupInfoScreen" component={GroupInfoScreen} />
     </Stack.Navigator>
   );
 }

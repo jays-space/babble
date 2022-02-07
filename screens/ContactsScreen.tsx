@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigation } from "@react-navigation/native";
 import {
+  Alert,
   FlatList,
   StyleSheet,
   Text,
@@ -54,7 +55,7 @@ export default function ContactsScreen() {
 
   const handleCreateOrNavigateToNewChatRoom = async (selectedContacts) => {
     if (!currentUserDB) {
-      alert("No currentUserDB");
+      Alert.alert("No currentUserDB", "There was an error creating the group.");
       return;
     }
 
@@ -130,7 +131,7 @@ export default function ContactsScreen() {
             isSelected={
               toggleCreateGroup ? isContactSelected(contact) : undefined
             }
-            addOneToOneChatRoom={() => addChatRoom(contact)}
+            onPress={() => addChatRoom(contact)}
           />
         )}
         showsVerticalScrollIndicator={false}

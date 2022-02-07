@@ -37,7 +37,7 @@ export const styles = StyleSheet.create({
     justifyContent: "center",
   },
   content: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
   },
   name: {
