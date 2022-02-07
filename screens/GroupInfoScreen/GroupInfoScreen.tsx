@@ -3,7 +3,7 @@ import { useRoute } from "@react-navigation/native";
 import { View, Text, FlatList, ActivityIndicator, Alert } from "react-native";
 
 //AWS
-import { DataStore } from "aws-amplify";
+import { Auth, DataStore } from "aws-amplify";
 
 //MODELS
 import { ChatRoom, ChatRoomUser, User } from "../../src/models";
@@ -47,7 +47,19 @@ const GroupInfoScreen = () => {
     return chatRoom?.Admin?.id === id;
   };
 
-  const confirmDelete = (contact) => {
+  const confirmDelete = async (contact) => {
+    const {
+      attributes: { sub },
+    } = await Auth.currentAuthenticatedUser();
+
+    if (sub !== chatRoom?.Admin?.id) {
+      Alert.alert(
+        "Remove Contact",
+        `Only an admin can remove contacts from a group`
+      );
+      return;
+    }
+
     if (contact.id !== chatRoom?.Admin?.id) {
       Alert.alert(
         "Remove Contact",
@@ -66,11 +78,24 @@ const GroupInfoScreen = () => {
       );
     } else {
       Alert.alert("Remove Contact", `Cannot remove the admin from a group`);
+      return;
     }
   };
 
-  const removeContactFromGroup = (contact) => {
-    console.warn(`Removing ${contact.name} from ${chatRoom?.groupName}...`);
+  const removeContactFromGroup = async (contact) => {
+    const chatRoomUserToDelete = (await DataStore.query(ChatRoomUser)).filter(
+      (chatroomUser) =>
+        chatroomUser.chatRoom.id === chatRoom?.id &&
+        chatroomUser.user.id === contact.id
+    );
+
+    if (chatRoomUserToDelete.length > 0) {
+      // console.warn(`Removing:`, chatRoomUserToDelete);
+      DataStore.delete(chatRoomUserToDelete[0]);
+
+      //? update allUsers to exclude deleted user
+      setAllUsers(allUsers.filter((user) => user.id !== contact.id));
+    }
   };
 
   return (

@@ -32,7 +32,7 @@ export default function HomeScreen() {
       } = await Auth.currentAuthenticatedUser();
 
       console.log("currentUserID: ", currentUserID);
-      console.log("user: ",  await DataStore.query(User, currentUserID));
+      console.log("user: ", await DataStore.query(User, currentUserID));
 
       /*
        * get all chatRoomUser data, filter all records where currentUser
@@ -51,7 +51,8 @@ export default function HomeScreen() {
     return () => setChatRooms([]);
   }, []);
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await DataStore.clear();
     Auth.signOut();
   };
 
