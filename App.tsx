@@ -20,17 +20,9 @@ Amplify.configure(awsconfig);
 import { Message, MessageStatus, User as UserModel } from "./src/models";
 
 //UTILS
-import { PRNG, generateKeyPair, encrypt, decrypt } from "./utils/crypto";
+import { PRNG } from "./utils/crypto";
 
 setPRNG(PRNG);
-
-const obj = { hello: "world" };
-const pairA = generateKeyPair();
-const pairB = generateKeyPair();
-const sharedA = box.before(pairB.publicKey, pairA.secretKey);
-const sharedB = box.before(pairA.publicKey, pairB.secretKey);
-const encrypted = encrypt(sharedA, obj);
-const decrypted = decrypt(sharedB, encrypted);
 
 function App() {
   const [currentUser, setCurrentUser] = useState<UserModel | null>(null);

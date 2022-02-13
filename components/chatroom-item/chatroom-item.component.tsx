@@ -81,6 +81,18 @@ export default function ChatRoomItem({ chatRoom }) {
     }
   };
 
+  const isOnline = () => {
+    if (!user?.lastOnlineAt) {
+      return;
+    }
+
+    if (user?.lastOnlineAt < 5 * 60 * 1000) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   if (isLoading) {
     return <ActivityIndicator />;
   }
@@ -103,6 +115,8 @@ export default function ChatRoomItem({ chatRoom }) {
           <Text style={styles.notificationText}>{chatRoom.newMessages}</Text>
         </View>
       )}
+
+      {isOnline() && <View style={styles.activityContainer} />}
 
       {/* content container */}
       <View style={styles.contentContainer}>

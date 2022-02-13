@@ -47,6 +47,14 @@ export const styles = StyleSheet.create({
     fontWeight: "bold",
     textTransform: "capitalize",
   },
+  status: {
+    flex: 1,
+    marginBottom: 2,
+    fontSize: 14,
+    textTransform: "capitalize",
+    fontStyle: "italic",
+    color: theme.text.lightTheme.default
+  },
   text: {
     color: "grey",
   },

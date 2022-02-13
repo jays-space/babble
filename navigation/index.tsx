@@ -75,7 +75,7 @@ function RootNavigator() {
         name="Contacts"
         component={ContactsScreen}
         options={{
-          title: "Contacts",
+          title: "People",
           headerBackTitleVisible: false,
           headerStyle: {
             backgroundColor: theme.primary.main,

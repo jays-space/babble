@@ -21,6 +21,7 @@ import {
 
 //COMPONENTS
 import ChatRoomItem from "../components/chatroom-item";
+import { theme } from "../constants/Colors";
 
 export default function HomeScreen() {
   const [chatRooms, setChatRooms] = useState<ChatRoom[]>([]);
@@ -46,7 +47,7 @@ export default function HomeScreen() {
     };
 
     fetchChatRooms();
-    console.log("chatRooms: ", chatRooms);
+    // console.log("chatRooms: ", chatRooms);
 
     return () => setChatRooms([]);
   }, []);
@@ -75,7 +76,7 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   page: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: theme.white.default,
   },
 });
 

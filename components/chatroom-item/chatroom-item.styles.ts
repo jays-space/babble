@@ -25,11 +25,24 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "white",
     borderRadius: 10,
-    backgroundColor: theme.primary.main,
+    backgroundColor: theme.error.default,
   },
   notificationText: {
     fontSize: 12,
-    color: "white",
+    color: theme.white.default,
+  },
+  activityContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
+    top: "95%",
+    left: 48,
+    width: 14,
+    height: 14,
+    borderWidth: 1,
+    borderColor: theme.white.default,
+    borderRadius: 7,
+    backgroundColor: theme.primary.main,
   },
   contentContainer: {
     flex: 1,
@@ -48,6 +61,6 @@ export const styles = StyleSheet.create({
     textTransform: "capitalize",
   },
   text: {
-    color: "grey",
+    color: theme.grey.default,
   },
 });

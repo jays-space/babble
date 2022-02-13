@@ -29,6 +29,7 @@ export default function ContactsItem({
       <View style={styles.contentContainer}>
         <View style={styles.content}>
           <Text style={styles.name}>{contact.name}</Text>
+          <Text style={styles.status}>{contact?.status}</Text>
           {isAdmin && <Text>Admin</Text>}
         </View>
       </View>

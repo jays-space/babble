@@ -20,7 +20,7 @@ export default {
 
 export const theme = {
   primary: {
-    main: "#3777F0",
+    main: "#00BF6D", //"#3777F0", //0xFF00BF6D
   },
   grey: {
     ultraLightGrey: "#F2F2F2",
@@ -33,4 +33,15 @@ export const theme = {
   white: {
     default: "#FFF",
   },
+  text: {
+    lightTheme: {
+      default: "#A4A4A6",
+    },
+  },
+  warning: {
+    default: "#F3BB1C"
+  },
+  error: {
+    default: "#F03738"
+  }
 };
