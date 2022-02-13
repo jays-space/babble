@@ -51,18 +51,20 @@ export default function HomeScreenHeader() {
 
       {/* Icons */}
       <View style={styles.iconsContainer}>
-        <TouchableOpacity onPress={() => navigate.navigate("SettingsScreen")}>
+        {/* new chat */}
+        <TouchableOpacity onPress={() => navigate.navigate("Contacts")}>
           <Feather
-            name="settings"
+            name="edit-2"
             size={22}
             color={styles.icons.color}
             style={styles.icon}
           />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigate.navigate("Contacts")}>
+        {/* settings */}
+        <TouchableOpacity onPress={() => navigate.navigate("SettingsScreen")}>
           <Feather
-            name="edit-2"
+            name="settings"
             size={22}
             color={styles.icons.color}
             style={styles.icon}

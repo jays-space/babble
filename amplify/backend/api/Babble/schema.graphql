@@ -24,7 +24,7 @@ type Message @model @auth(rules: [{ allow: public }]) {
   audio: String
   status: MessageStatus
   replyToMessageID: ID
-  forUser: User @belongsTo
+  forUserID: ID
 }
 
 type User @model @auth(rules: [{ allow: public }]) {
@@ -37,3 +37,4 @@ type User @model @auth(rules: [{ allow: public }]) {
   lastOnlineAt: AWSTimestamp
   publicKey: String
 }
+ 

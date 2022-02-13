@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { S3Image } from "aws-amplify-react-native";
 import { useActionSheet } from "@expo/react-native-action-sheet";
+import { box } from "tweetnacl";
 
 //MODELS
 import { MessageStatus, User, Message as MessageModel } from "../../src/models";
@@ -20,6 +21,11 @@ import AudioPlayer from "../audio-player";
 //STYLES
 import { styles } from "./message.styles";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  decrypt,
+  getCurrentUserSecretKey,
+  stringToUint8Array,
+} from "../../utils/crypto";
 
 // TODO: type definitions
 export default function Message({
@@ -37,6 +43,7 @@ export default function Message({
   >(null);
   const [audioUri, setAudioUri] = useState<any>(null);
   const [message, setMessage] = useState<MessageModel>(MessageProp);
+  const [decryptedMessage, setDecryptedMessage] = useState("");
   const [repliedTo, setRepliedTo] = useState<MessageModel | undefined>(
     undefined
   );
@@ -107,6 +114,29 @@ export default function Message({
   useEffect(() => {
     setMessageAsRead();
   }, [isCurrentUserMessage]);
+
+  useEffect(() => {
+    const decryptMessage = async () => {
+      if (!message?.content || !messageSender?.publicKey) {
+        return;
+      }
+
+      const currentUserPrivateKey = await getCurrentUserSecretKey();
+      if (!currentUserPrivateKey) {
+        return;
+      }
+
+      const sharedKey = box.before(
+        stringToUint8Array(messageSender?.publicKey),
+        currentUserPrivateKey
+      );
+
+      const decrypted = decrypt(sharedKey, message?.content);
+      setDecryptedMessage(decrypted?.newMessage);
+    };
+
+    decryptMessage();
+  }, [message, messageSender]);
 
   // TODO: re-renders infinately. WHY??
   // message?.userID === messageSender
@@ -228,7 +258,7 @@ export default function Message({
 
         <View style={styles.messageContainer}>
           {/* text content */}
-          {!!message.content && (
+          {!!decryptedMessage && (
             <Text
               style={[
                 isCurrentUserMessage
@@ -238,7 +268,7 @@ export default function Message({
                   !!message?.status && { maxWidth: "92%" },
               ]}
             >
-              {isDeleted ? "message deleted..." : message.content}
+              {isDeleted ? "message deleted..." : decryptedMessage}
             </Text>
           )}
 

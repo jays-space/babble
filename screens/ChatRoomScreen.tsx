@@ -8,7 +8,7 @@ import {
 } from "react-native";
 
 // AWS
-import { DataStore, SortDirection } from "aws-amplify";
+import { Auth, DataStore, SortDirection } from "aws-amplify";
 
 // MODELS
 import { ChatRoom, Message as MessageModel } from "../src/models";
@@ -82,9 +82,14 @@ export default function ChatRoomScreen() {
       return;
     }
 
+    const {
+      attributes: { sub: currentUserID },
+    } = await Auth.currentAuthenticatedUser();
+
     const fetchedMessages = await DataStore.query(
       MessageModel,
-      (message) => message.chatroomID("eq", chatRoom?.id),
+      (message) =>
+        message.chatroomID("eq", chatRoom?.id).forUserID("eq", currentUserID),
       {
         sort: (message) => message.createdAt(SortDirection.DESCENDING),
       }

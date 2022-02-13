@@ -50,6 +50,7 @@ export declare class Message {
   readonly audio?: string;
   readonly status?: MessageStatus | keyof typeof MessageStatus;
   readonly replyToMessageID?: string;
+  readonly forUserID?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
   constructor(init: ModelInit<Message, MessageMetaData>);

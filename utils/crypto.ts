@@ -5,6 +5,8 @@ import {
   encode as encodeBase64,
   decode as decodeBase64,
 } from "@stablelib/base64";
+import AsyncStorageLib from "@react-native-async-storage/async-storage";
+import { PRIVATE_KEY } from "../constants/Crypto";
 
 export const PRNG = (x, n) => {
   const randomBytes = getRandomBytes(n);
@@ -57,4 +59,18 @@ export const decrypt = (
 
   const base64DecryptedMessage = decodeUTF8(decrypted);
   return JSON.parse(base64DecryptedMessage);
+};
+
+//** transforms a string of bytes into an typed array of 8-bit unsigned integer values
+export const stringToUint8Array = (keyString: string) =>
+  Uint8Array.from(keyString.split(",").map((str: string) => parseInt(str)));
+
+export const getCurrentUserSecretKey = async () => {
+  const keyString = await AsyncStorageLib.getItem(PRIVATE_KEY);
+
+  if (!keyString) {
+    throw "no keyString returned";
+  }
+
+  return stringToUint8Array(keyString);
 };

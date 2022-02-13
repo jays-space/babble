@@ -85,7 +85,7 @@ export default function ChatRoomItem({ chatRoom }) {
     return <ActivityIndicator />;
   }
 
-  return (
+  return !user ? null : (
     <TouchableOpacity
       onPress={handleNavigateToChatRoom}
       style={styles.container}

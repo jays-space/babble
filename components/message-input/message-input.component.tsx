@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigation } from "@react-navigation/native";
 import {
   View,
   TextInput,
@@ -8,6 +9,7 @@ import {
   Keyboard,
   Image,
   Text,
+  Alert,
 } from "react-native";
 import {
   AntDesign,
@@ -22,6 +24,8 @@ import * as ImagePicker from "expo-image-picker";
 import * as Device from "expo-device";
 import "react-native-get-random-values";
 import { v4 as uuidv4 } from "uuid";
+import { box } from "tweetnacl";
+import AsyncStorageLib from "@react-native-async-storage/async-storage";
 
 //AWS
 import { Auth, DataStore, Storage } from "aws-amplify";
@@ -31,11 +35,20 @@ import {
   Message as MessageModel,
   ChatRoom,
   MessageStatus,
+  ChatRoomUser as ChatRoomUserModel,
+  User as UserModel,
 } from "../../src/models";
 
 //COMPONENTS
 import AudioPlayer from "../audio-player";
 import MessageComponent from "../message/message.component";
+
+//UTILS
+import {
+  encrypt,
+  getCurrentUserSecretKey,
+  stringToUint8Array,
+} from "../../utils/crypto";
 
 //STYLES
 import { styles } from "./message-input.styles";
@@ -56,6 +69,8 @@ export default function MessageInput({
   const [progress, setProgress] = useState(0);
   const [isEmojiPickerVisible, setIsEmojiPickerVisible] =
     useState<boolean>(false);
+
+  const navigation = useNavigation();
 
   //* get currentUser
   useEffect(() => {
@@ -182,15 +197,58 @@ export default function MessageInput({
   };
 
   //* Send message functionality
-  const sendMessage = async () => {
+
+  const encryptAndSendOneToOneMessage = async (user: UserModel) => {
     if (!currentUserID) {
       return;
     }
 
+    const currentUserPrivateKey = await getCurrentUserSecretKey();
+
+    //! will run this alert as many times as there are users
+    if (!currentUserPrivateKey) {
+      Alert.alert(
+        "Security Error",
+        "Cannot send message. Please set new encryption keys in the Settings.",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "To Settings",
+            onPress: () => navigation.navigate("SettingsScreen"),
+            style: "default",
+          },
+        ]
+      );
+
+      return;
+    }
+
+    //! will run this alert as many times as there are users
+    if (!user.publicKey) {
+      Alert.alert(
+        "Security Error",
+        "Cannot send message. The receipient has not set up their encryption keys yet. Until the reciepient generates new encryption keys, you cannot securly send/recieve messages."
+      );
+
+      return;
+    }
+
+    // encrypt message
+    const sharedKey = box.before(
+      stringToUint8Array(user?.publicKey),
+      currentUserPrivateKey
+    );
+
+    const encryptedMessage = encrypt(sharedKey, { newMessage });
+
     const newMessageRef = await DataStore.save(
       new MessageModel({
-        content: newMessage,
+        content: encryptedMessage, //! <- this message is encrypted
         userID: currentUserID,
+        forUserID: user.id,
         chatroomID: chatRoom.id,
         replyToMessageID: messageReplyTo?.id,
         status: MessageStatus.SENT,
@@ -198,6 +256,20 @@ export default function MessageInput({
     );
 
     updateLastMessage(newMessageRef);
+  };
+
+  const sendMessage = async () => {
+    // get all users of the current chatroom
+    const users = (await DataStore.query(ChatRoomUserModel))
+      .filter((chatroomUser) => chatroomUser.chatRoom.id === chatRoom.id)
+      .map((chatroomUser) => chatroomUser.user);
+
+    // for each user, encrypt the 'content' with their public key, and save this as a new message
+    if (!users) {
+      return;
+    }
+
+    await Promise.all(users.map((user) => encryptAndSendOneToOneMessage(user)));
     clearFieldsState();
   };
 
