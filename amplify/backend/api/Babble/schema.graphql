@@ -4,7 +4,7 @@ enum MessageStatus {
   READ
 }
 
-type ChatRoom @model @auth(rules: [{allow: public}]) {
+type ChatRoom @model @auth(rules: [{ allow: public }]) {
   id: ID!
   LastMessage: Message @hasOne
   Messages: [Message] @hasMany(indexName: "byChatRoom", fields: ["id"])
@@ -15,7 +15,7 @@ type ChatRoom @model @auth(rules: [{allow: public}]) {
   imageUri: String
 }
 
-type Message @model @auth(rules: [{allow: public}]) {
+type Message @model @auth(rules: [{ allow: public }]) {
   id: ID!
   content: String
   userID: ID! @index(name: "byUser")
@@ -24,9 +24,10 @@ type Message @model @auth(rules: [{allow: public}]) {
   audio: String
   status: MessageStatus
   replyToMessageID: ID
+  forUser: User @belongsTo
 }
 
-type User @model @auth(rules: [{allow: public}]) {
+type User @model @auth(rules: [{ allow: public }]) {
   id: ID!
   name: String!
   imageUri: String
@@ -34,5 +35,5 @@ type User @model @auth(rules: [{allow: public}]) {
   Messages: [Message] @hasMany(indexName: "byUser", fields: ["id"])
   chatrooms: [ChatRoom] @manyToMany(relationName: "ChatRoomUser")
   lastOnlineAt: AWSTimestamp
+  publicKey: String
 }
- 

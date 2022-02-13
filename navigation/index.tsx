@@ -32,6 +32,7 @@ import ChatRoomScreen from "../screens/ChatRoomScreen";
 import HomeScreenHeader from "../components/screen-headers/home-screen/home-screen-header.component";
 import ChatRoomScreenHeader from "../components/screen-headers/chat-room/chatroom-screen-header.component";
 import GroupInfoScreen from "../screens/GroupInfoScreen";
+import SettingsScreen from "../screens/Settings";
 
 export default function Navigation({
   colorScheme,
@@ -99,7 +100,31 @@ function RootNavigator() {
         })}
       />
 
-      <Stack.Screen name="GroupInfoScreen" component={GroupInfoScreen} />
+      <Stack.Screen
+        name="GroupInfoScreen"
+        component={GroupInfoScreen}
+        options={{
+          title: "About Chatroom",
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: theme.primary.main,
+          },
+          headerTintColor: theme.white.default,
+        }}
+      />
+      
+      <Stack.Screen
+        name="SettingsScreen"
+        component={SettingsScreen}
+        options={{
+          title: "Settings",
+          headerBackTitleVisible: false,
+          headerStyle: {
+            backgroundColor: theme.primary.main,
+          },
+          headerTintColor: theme.white.default,
+        }}
+      />
     </Stack.Navigator>
   );
 }

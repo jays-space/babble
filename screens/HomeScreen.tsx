@@ -51,11 +51,6 @@ export default function HomeScreen() {
     return () => setChatRooms([]);
   }, []);
 
-  const handleSignOut = async () => {
-    await DataStore.clear();
-    Auth.signOut();
-  };
-
   return (
     <View style={styles.page}>
       {chatRooms.length > 0 ? (
@@ -73,20 +68,6 @@ export default function HomeScreen() {
           <Text style={{ textAlign: "center" }}>No chats</Text>
         </View>
       )}
-
-      {/* <TouchableOpacity
-        onPress={handleSignOut}
-        style={{
-          backgroundColor: "orangered",
-          width: "100%",
-          height: 50,
-          borderRadius: 30,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text>SignOut</Text>
-      </TouchableOpacity> */}
     </View>
   );
 }
